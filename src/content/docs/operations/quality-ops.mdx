@@ -1,0 +1,181 @@
+---
+title: 质量运维
+---
+
+> 权威副本：`cloudflare_work/docs/quality-ops.md`
+
+
+跨 Worker 规范：Hard Evaluator 聚类告警 + **自动日志取证入库** + 诊断 Agent 工单。
+
+需求来源：[requirement/反馈系统.md](requirement/反馈系统.md)
+
+## 1. 架构
+
+### 1.1 已实现（MVP）
+
+```
+业务 Worker emit QualityIncident → Q_quality-incidents
+  → orchestrator ingest KV 簇
+  → Cron */30：Phase 0 簇汇总邮件
+  → hard 簇：QualityAuditPipeline（KV 时间线 → LLM 诊断 → 工单邮件）
+```
+
+### 1.2 目标（演进中）
+
+```
+email-rule 判定不合格 → emitQualityIncident(dedupKey)
+  → Q_quality-incidents
+  → ingest KV + 立即触发 QualityCapture Workflow（每条 incident 全量，与告警 evaluator 解耦，不等 Cron）
+      → queryObservabilityIncidents：KV timeline（incident 簇）
+      → fetchInvocationLogs：按 `$metadata.requestId` 精确拉平台 JSON → **R2** `quality-capture/logs/{invocationId}.json`
+      → writeMaintenanceLog（traceId=dedupKey, action=quality_capture；detail 仅存 invocationIds + logsFiles 指针）
+  → hard 簇：QualityAuditPipeline（LLM 诊断 + 工单邮件，与 Capture 解耦）
+```
+
+| 阶段 | 名称 | 触发 | 产出 |
+|------|------|------|------|
+| Phase 0 | 簇汇总告警 | Cron */30 | 汇总邮件（非工单） |
+| **Capture** | **自动取证入库** | **每条 incident 即发即采** | **audit-log 索引 + R2 全量平台日志** |
+| **Digest v1** | **每日日志汇总** | **Cron 08:00 上海（UTC 0 0 * * *）** | **增量 capture 邮件 + zip 附件；KV `digest:log-baseline`** |
+| Phase 1 Audit | 诊断工单 | hard 簇 | LLM 诊断 + 工单邮件 |
+
+**原则**：入库为主；邮件仅 hard 簇汇总，避免几十条刷屏。
+
+## 2. 契约
+
+| 项 | 位置 |
+|----|------|
+| 类型与 Hard Evaluator | `framework_sdk_worker/evaluation/quality-incident` |
+| 平台日志 bundle | `framework_sdk_worker/observability/platform-log` |
+| 规则 JSON | [`rules/quality-ops.json`](../rules/quality-ops.json) |
+| 唯一 ID | **`dedupKey`**（与 notify、`digest_summaries.dedup_key` 同源） |
+
+## 3. 绑定
+
+| Worker | 角色 |
+|--------|------|
+| email-rule-worker | `Q_QUALITY_INCIDENTS` producer；`emitQualityIncident` 于 summarize / llm-pending |
+| orchestrator-worker | queue consumer + `KV_QUALITY_OPS` + `QUALITY_AUDIT` workflow + Cron |
+| orchestrator-worker | `QUALITY_CAPTURE` workflow + `R2_QUALITY_CAPTURE` + `SVC_AUDIT_LOG`/`AUDIT_LOG_AUTH_TOKEN` + `CF_API_TOKEN_LOGS` + `ACCOUNT_ID` |
+| audit-log-worker | Capture / 诊断结果持久化（`traceId=dedupKey`） |
+
+首次部署：
+
+```bash
+npx wrangler queues create quality-incidents
+npx wrangler kv namespace create KV_QUALITY_OPS
+npx wrangler r2 bucket create quality-capture-logs
+# 回填 orchestrator-worker/wrangler.toml 中 KV id 与 ACCOUNT_ID
+# 在 Secrets Store 创建 CF_API_TOKEN_LOGS（Logs Read）；AUDIT_LOG_AUTH_TOKEN 复用 RULES_ADMIN_TOKEN
+```
+
+## 4. 代码落点
+
+| 模块 | 路径 |
+|------|------|
+| emit | `email-rule-worker/src/services/emit-quality-incident.ts` |
+| consumer | `orchestrator-worker/src/queue/quality-incident-consumer.ts` |
+| KV store | `orchestrator-worker/src/services/quality-cluster-store.ts` |
+| 日志查询 / R2 | `orchestrator-worker/src/services/observability-query.ts`、`quality-capture-log-store.ts` |
+| Cron Phase 0 | `orchestrator-worker/src/cron/quality-cluster-cron.ts` |
+| Cron Digest v1 | `orchestrator-worker/src/cron/quality-analysis-digest-cron.ts` |
+| Digest baseline / zip | `quality-digest-baseline.ts`、`quality-digest-log-zip.ts` |
+| Audit Workflow | `orchestrator-worker/src/workflows/quality-audit-pipeline.ts` |
+| Capture Workflow | `orchestrator-worker/src/workflows/quality-capture-pipeline.ts` |
+
+## 5. 日志约定
+
+email-rule emit 字段：`because`、`bodyLen`、`fetchFailed`、`chain`、`path`、`summary`、`dedupKey`、`url`、`ts`；可选 **`invocationId`**（queue consumer）、**`emailInvocationId`**（邮件热路径，经 `LlmPendingJob` 透传）。`normalizeQualityIncident` 自动补齐 `ts`/`clusterKey`。
+
+结构化 console 日志：`email-rule-worker/src/services/pipeline-log.ts`（`【标签】[enum] key=value`）。
+
+## 6. Observability 双轨
+
+### 6.1 生产 Capture → REST API + R2
+
+- 端点：`POST /accounts/{id}/workers/observability/telemetry/query`
+- 认证：`CF_API_TOKEN_LOGS`（Logs Read）+ `ACCOUNT_ID` var
+- **主查询**：`filters` → `$metadata.requestId` **eq** `invocationId`（Dashboard Invocations 分组键；与 `$workers.requestId` 同源）
+- **发现 fallback**：incident 无 invocationId 时，用 dedupKey 提取 messageId 探针 → `$metadata.message includes` → 从首条 event 解析 requestId → 再精确查询
+- timeframe = incident.ts ±2h；保留期：**7 天** → 触发时必须入库 R2
+- **R2 键**：`quality-capture/logs/{invocationId}.json`（`WorkersObservabilityCaptureBundle`，保留 `$workers`/`$metadata` 全字段）
+
+`observability-query.ts`：`fetchInvocationLogs`、`discoverInvocationIdByDedupProbe`；KV 仍用于 timeline（`queryObservabilityIncidents`）。
+
+### 6.2 人工排查 → Observability MCP
+
+- URL：`https://observability.mcp.cloudflare.com/mcp`
+- 认证：Cloudflare OAuth（给人用，不适合 Queue 批处理）
+- 工具：`query_worker_observability`、`observability_keys`、`observability_values`
+- 用途：Cursor 单条调试、验证 REST filter；**不作为 Capture 主路径**
+
+Cursor 配置示例：
+
+```json
+{
+  "mcpServers": {
+    "cloudflare-observability": {
+      "url": "https://observability.mcp.cloudflare.com/mcp"
+    }
+  }
+}
+```
+
+**不做**：QualityCapture 内 LLM 调 MCP 捞日志。
+
+## 7. 持久化
+
+Capture 完成后写入 audit-log：
+
+| 字段 | 值 |
+|------|-----|
+| `worker` | `orchestrator-worker` |
+| `action` | `quality_capture` |
+| `traceId` | `dedupKey` |
+| `detail` | JSON：`timeline`、`timelineSource`、`invocationIds`、`logsFiles[]`（`r2Key`/`eventCount`/`role`）、`logsCaptured`、`incident`（**不含** events 数组） |
+
+诊断工单可选：`action=quality_diagnosis`。
+
+幂等（claim-first）：先 put KV `captured:{dedupKey}`（TTL 7d，覆盖日志保留期）再执行 capture，已存在则 skip；audit-log 查重为兜底，需扩展 `GET /v1/logs` 支持 traceId / sinceTs 过滤（Digest 日报增量窗依赖 sinceTs+sinceId）。
+
+### 7.1 每日日志汇总（Digest v1）
+
+- **Cron**：`0 0 * * *` UTC ≈ 上海 08:00；`dedupKey=quality-digest:{YYYY-MM-DD}:part-N`
+- **增量**：KV `digest:log-baseline`（`lastTs` + `lastLogId`）；查询 `action=quality_capture` 且 `ts > lastTs`（同 ts 则 `id > lastLogId`）
+- **正文**：短摘要（明细不在正文）
+- **附件**：`quality-captures-{date}.csv`（仅第 1 封）+ `quality-logs-{date}-part{N}.zip`（manifest + R2 平台 JSON）
+- **整封上限**：Cloudflare Email **5 MiB**（普通收件人）/ **25 MiB**（verified destination，`OPS_ALERT_TO` 适用）；配置 `QUALITY_DIGEST_EMAIL_MAX_BYTES` / notify `EMAIL_MAX_MESSAGE_BYTES` 对齐
+- **超限**：orchestrator 按 capture 行装箱拆多封；全部 part 成功后推进 baseline
+- **首跑**：无 KV 时 baseline = 上海昨日 00:00
+- **后续**：Cursor Analyze / 修复链接不在 v1；见 `.cursor/plans/quality_自动分析阶段_da376010.plan.md`
+
+## 8. 历史批量补录
+
+从 email-rule D1 筛候选：
+
+```sql
+SELECT dedup_key, url, summary_kind, fallback, tech_create_time
+FROM digest_summaries
+WHERE summary_kind = 'title_only' OR fallback = 1
+ORDER BY tech_create_time DESC;
+```
+
+批量触发 QualityCapture（限速 ~5/min）。手录列表可 CSV（`dedupKey`, `ts`）导入同一 Workflow。
+补录路径 KV 必然为空（`dedup:` 索引 TTL 24h、silent 类从未入簇），实为 REST-only。
+
+**超 7 天**：Observability 无 logs，仅能靠 R2 快照 + D1 元数据恢复"元数据 + summary"（R2 快照为 digest 产物 JSON，非链路日志），timeline 为空。
+
+## 9. 验收标准
+
+1. 新发：consumer 收到消息起 5 分钟内 audit-log 有 `quality_capture` 记录（`detail.logsCaptured=true` 且 `logsFiles[].eventCount>0`；timeline 含 payload 或 KV 簇）
+2. 历史：补录完成后按 `dedupKey` 查 audit-log → 读 `logsFiles[].r2Key` 从 R2 取全量平台 JSON
+3. 幂等：claim-first（KV `captured:{dedupKey}` TTL 7d 先行占位），同 `dedupKey` 重放不重复 capture
+4. 兜底：incident 无 invocationId 时 probe 发现 requestId 仍能拉 logs
+5. 空取证：无 invocationId 且 probe 失败时也写库（`logsCaptured=false`，timeline 仍含 payload incident）
+
+## 10. 非目标
+
+- 独立 Ticket UI Worker
+- Observability MCP 作为生产 Capture 主路径
+- 每条不合格都发邮件
+- 新建 `GET /tickets/:id/logs` 公网 API（扩展现有 orchestrator 即可）

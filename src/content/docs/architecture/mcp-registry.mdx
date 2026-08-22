@@ -1,0 +1,140 @@
+---
+title: MCP Registry 对接
+---
+
+> 权威副本：`cloudflare_work/docs/mcp-registry-integration.md`
+
+
+新建或改造 Worker 时，若提供 **Agent / Code Mode 可调用的 HTTP API**，须按本规范对接 `mcp-registry-worker`（或 PR 写明豁免理由）。
+
+## 1. 定位与划界
+
+| 组件 | 职责 |
+|------|------|
+| **mcp-registry-worker** | Agent 可调 API 的 OpenAPI 注册中心：MCP `search` / `execute` |
+| **deploy-tracker `worker_registry`** | 部署元数据（版本、env 指纹、谁部署）— 见 [requirement/worker-registry.md](requirement/worker-registry.md) |
+
+两者 **不合并**。`worker_name` 可交叉引用，表结构与写入路径独立。
+
+```mermaid
+flowchart LR
+  Agent["Agent / config-agent"]
+  Registry["mcp-registry-worker"]
+  Downstream["下游 Worker"]
+  Agent -->|"MCP search/execute"| Registry
+  Registry -->|"SVC_* fetch /openapi.json"| Downstream
+  Registry -->|"Bearer tokenKey"| Downstream
+```
+
+## 2. 登记判定
+
+**必须登记**（满足任一即可）：
+
+- 对外提供 Bearer 鉴权的业务 HTTP API（`/v1/*`、`/api/v1/*` 或等价）
+- Agent / config-agent / market-data-mcp / Code Mode 可能调用
+
+**豁免**（PR 须写明理由）：
+
+- 薄反代（edge-gateway）
+- MCP Server 本体（mcp-registry、market-data-mcp）
+- Agent 宿主（orchestrator、config-agent、market-qa-agent）
+- 纯 cron / email / CDN / Playground UI / 运维触发器（如 strategy-monitor `/sync`）
+- 内部任务 Worker（browser_run）
+
+`cloudflare-os/` 不在本规范范围。
+
+## 3. Worker 侧 checklist
+
+- [ ] `src/openapi/document.ts`：静态 OpenAPI 3.1，或 chanfana（参考 advisor / invest-rss）
+- [ ] `GET /openapi.json`：**无鉴权**（registry 拉取用；业务 API 仍走 Bearer）
+- [ ] 文档只覆盖登记前缀内的端点（勿把 `/internal/*` 调试门禁暴露进 spec）
+
+样板：`counter-worker/src/openapi/document.ts` + `app.get('/openapi.json', ...)`。
+
+## 4. mcp-registry-worker 侧 checklist
+
+新增可发现服务时，在 **mcp-registry-worker** 仓（当前静态表模式）完成：
+
+- [ ] [`src/registry.ts`](../mcp-registry-worker/src/registry.ts) `REGISTRY` 追加条目
+- [ ] `wrangler.toml`：`[[services]]`（`SVC_*`）+ `[[secrets_store_secrets]]`
+- [ ] [`src/env.ts`](../mcp-registry-worker/src/env.ts) 类型追加
+- [ ] [`framework_sdk_worker/src/mcp/fallback-spec.ts`](../framework_sdk_worker/src/mcp/fallback-spec.ts) 追加对应 paths（上游全失败时的静态兜底）
+- [ ] `test/openapi-merge.test.ts`：`matchService` 覆盖新前缀
+
+### RegistryEntry 字段
+
+| 字段 | 说明 |
+|------|------|
+| `worker` | CF Worker 名 |
+| `svcKey` | `env` 中 Service Binding 名，如 `SVC_DESK` |
+| `tokenKey` | `env` 中 token binding 名 |
+| `baseUrl` | Service Binding 虚拟 host，如 `https://desk`（与 [edge-gateway-routes.json](edge-gateway-routes.json) 的 `fetchHost` 对齐） |
+| `tag` / `description` | OpenAPI 展示，帮助 LLM 选型 |
+| `matchPrefixes` | execute 路由白名单前缀（靠前优先；勿与既有前缀冲突） |
+| `timeoutMs` | 可选；LLM 类长调用放宽 |
+
+## 5. 命名与 Secrets
+
+- Binding / Token 公式见 [spec-name/标准命名规则需求.md](spec-name/标准命名规则需求.md) §4
+- 对照表（无密钥）：[secrets-inventory.md](secrets-inventory.md)
+- mcp-registry 侧 `tokenKey` 可与下游本地 binding 名不同，但 `secret_name` 必须指向 **同值** Store secret
+- Admin 类多数映射 Store `RULES_ADMIN_TOKEN`；金价/基金 sync 类用独立 Store secret（与下游 `SYNC_BEARER_TOKEN` 同值）
+
+## 6. 与 edge-gateway
+
+公网 API：先改 [edge-gateway-routes.json](edge-gateway-routes.json)，再登记 mcp-registry。  
+`baseUrl` 的 host 段 = gateway `fetchHost`（例：`fetchHost: "desk"` → `https://desk`）。  
+仅 Service Binding 可达、不上 gateway 的 Worker（如 analysis-engine）仍可登记。
+
+## 7. 部署顺序
+
+1. 下游 Worker Release（确保线上 `/openapi.json` 可达）
+2. SDK（若改了 `fallback-spec`）Release
+3. **mcp-registry-worker** Release（最后；依赖全部 `SVC_*`）
+
+## 8. 演进路线（目标态，非本次阻塞）
+
+| 阶段 | 内容 |
+|------|------|
+| **P0（当前）** | 静态 `registry.ts` + 手工 OpenAPI |
+| **P1** | SDK `registerOpenApiRoute` + `generate-mcp-registry.mjs`（META/manifest → registry + wrangler 片段 + fallback） |
+| **P2 可选** | D1 / DO SQLite 存元数据 + Admin 启停；**不能**省掉新 Worker 的 wrangler `SVC_*` deploy |
+
+硬约束：Service Binding 须在 mcp-registry `wrangler.toml` **编译期**声明，运行时自注册无法替代。
+
+## 9. 登记台账
+
+### 已对接
+
+| Worker | matchPrefixes（摘要） |
+|--------|----------------------|
+| advisor-worker | `/v1/advice` |
+| invest-rss-worker | `/v1/events`, `/v1/portfolio`, `/v1/rules` |
+| email-rule-worker | `/v1/content-filters`, `/v1/digests` |
+| audit-log-worker | `/v1/log`, `/v1/logs` |
+| counter-worker | `/v1/id` |
+| notify-worker | `/v1/send`, `/v1/quota/async` |
+| llm-gateway-worker | `/v1/usage/neurons`, `/v1/models`, `/v1/chat` |
+| decision-desk-worker | `/v1/drafts` |
+| fund-monitor-worker | `/v1/codes`, `/v1/orders`, `/v1/summary` |
+| fund-price-worker | `/v1/quotes` |
+| fund-info-worker | `/api/v1` |
+| gold-price-worker | `/intraday` |
+| lib-newbook-worker | `/v1/notify-clc-prefix` |
+| analysis-engine-worker | `/v1/worldview` |
+
+### 豁免
+
+| Worker | 理由 |
+|--------|------|
+| mcp-registry-worker | registry 本体 |
+| edge-gateway-worker | 薄反代 |
+| market-data-mcp | 独立 MCP Server |
+| config-agent / market-qa-agent / orchestrator-worker | Agent 宿主（消费者） |
+| deploy-tracker-worker | 运维 Dashboard / 部署元数据 |
+| strategy-monitor | 运维触发器 |
+| browser_run / manim-playground-worker | 内部任务 / Playground |
+| r2-image-transform-worker / r2-viewer-worker | CDN / R2 浏览 |
+| my-blog-subscribe-worker | 公开订阅流 |
+
+新增 Worker 登记或豁免时 **同步更新本表**。

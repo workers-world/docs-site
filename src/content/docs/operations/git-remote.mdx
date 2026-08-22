@@ -1,0 +1,161 @@
+---
+title: Git Remote 切换
+---
+
+> 权威副本：`cloudflare_work/docs/git-remote-protocol.md`
+
+
+脚本：仓库根目录 [`git-remote-protocol.sh`](../git-remote-protocol.sh)
+
+在指定目录下递归查找 git 仓库，批量改写 `origin`（或全部 remote）的 URL。默认只预览，不会改写。
+
+## 适用场景
+
+本工作区各 Worker 为独立 git 仓。除在同一 host 上切换 SSH ↔ HTTPS 外，还可整批切到 **Cursor Origin**（`origin.cursor.com`）或切回 **GitHub**。Cursor Origin 支持 GitHub sync，可作为日常 push/pull 中转，替代 EC2/Gitea 方案。
+
+脚本**只改本地 remote URL**，不创建 Origin 仓、不配置 GitHub sync、不部署。
+
+## 模式对照
+
+| 模式 | 目标 URL 形态 |
+|------|----------------|
+| `ssh` | `git@host:owner/repo.git`（Cursor Origin 会 SKIP，仅 HTTPS） |
+| `https` | `https://host/owner/repo.git` |
+| `cursor` | `https://origin.cursor.com/origin-ongoing/<repo>.git` |
+| `github` | `https://github.com/<owner>/<repo>.git`（优先恢复 `remote.<name>.githuburl`） |
+
+同时识别并归一化：
+
+- `https://HOST/owner/repo(.git)?`
+- `git@HOST:owner/repo(.git)?`
+- `ssh://git@HOST/owner/repo(.git)?`
+
+`cursor` 模式下 `<repo>` 取自现有 path 最后一段（如 `workers-world/.github` → 仓库名 `.github`，不用本地目录名）。
+
+## 前置条件（Cursor Origin）
+
+1. 安装并登录 Origin CLI：`origin auth login`（见 [Cursor Origin git 文档](https://cursor.com/docs/origin/git)）
+2. 在 [cursor.com/codebase](https://cursor.com/codebase) 对目标仓完成 **Sync from GitHub**（或已有同名 Origin 仓），否则切到 `cursor` 后 `push` 会失败
+3. Sync 后 push 仍会以 GitHub 为 source of truth（见 [Mirror GitHub](https://cursor.com/docs/origin/mirror-github)）
+
+## 用法
+
+在 `cloudflare_work` 根目录执行：
+
+```bash
+# 默认 dry-run：只扫描打印，不改 remote
+./git-remote-protocol.sh ssh
+./git-remote-protocol.sh https .
+
+# GitHub → Cursor Origin
+./git-remote-protocol.sh cursor .
+./git-remote-protocol.sh cursor . --apply
+
+# Cursor Origin → GitHub（优先恢复切换前记住的 URL）
+./git-remote-protocol.sh github .
+./git-remote-protocol.sh github . --apply
+
+# 指定扫描根目录
+./git-remote-protocol.sh cursor ~/Documents/03_study/02_tech/github
+
+# 非交互写入（跳过确认）
+./git-remote-protocol.sh cursor . --apply --yes
+
+# 处理每个仓的全部 remote（默认只 origin）
+./git-remote-protocol.sh https . --all-remotes --apply
+```
+
+## 环境变量
+
+| 变量 | 默认 | 说明 |
+|------|------|------|
+| `CURSOR_HOST` | `origin.cursor.com` | Cursor Origin 主机 |
+| `CURSOR_NS` | `origin-ongoing` | Origin namespace（URL 路径段） |
+| `GITHUB_HOST` | `github.com` | GitHub 主机 |
+| `GITHUB_DEFAULT_OWNER` | `workers-world` | 无保存 URL 时的默认 org |
+
+## GitHub owner 推断（`github` 模式、无 `githuburl` 时）
+
+| 仓库名 | owner |
+|--------|-------|
+| `scripts`、`blog-r2-tools` | `ONGOING-Z` |
+| `cloudflare_work` | SKIP（meta 仓目前仅在 Origin） |
+| 其余 | `workers-world`（或 `GITHUB_DEFAULT_OWNER`） |
+
+从 GitHub 切到 `cursor` 时，脚本会写入 `remote.<name>.githuburl` 保存原 URL，便于 `github` 模式准确还原（混 org 时尤其重要）。
+
+## 参数说明
+
+| 参数 | 说明 |
+|------|------|
+| `ssh` / `https` / `cursor` / `github` | 必填，目标模式 |
+| `DIR` | 可选，扫描根目录，默认当前目录 |
+| `--apply` | 预览后进入确认并写入；不加则始终 dry-run |
+| `--yes` | 仅与 `--apply` 同用，跳过确认 |
+| `--all-remotes` | 处理所有 remote；默认只改 `origin` |
+| `-h` / `--help` | 打印简短帮助 |
+
+## 输出含义
+
+| 前缀 | 含义 |
+|------|------|
+| `PLAN` | 将从旧 URL 改为新 URL（待变更） |
+| `OK` | 已是目标，跳过 |
+| `SKIP` | 无 remote / 无 URL / 无法解析 / Cursor 禁 SSH 等，跳过 |
+| `CHANGED` | `--apply` 确认后写入成功 |
+| `FAIL` | `git remote set-url` 失败 |
+
+汇总行含：扫描根目录、目标模式、仓库数、待变更 / 已是目标 / 跳过数量。
+
+## 安全约定
+
+1. **默认不写**：无 `--apply` 时等价 dry-run，结束会提示如何真正更新。
+2. **`--apply` 必须确认**：提示 `确认将以上 N 项写入 remote？[y/N]`，默认 N；仅 `y` / `yes` 才执行。
+3. **不改历史、不 push**：只改本地 `remote.<name>.url`（及 `cursor` 切换时的 `githuburl`），不影响已有 commit。
+4. **无法解析则跳过**：本地 path、非常见 URL 形态会 `SKIP`，不中断整批。
+
+## 推荐操作流程
+
+1. 先 dry-run，核对 `PLAN` 列表：
+
+   ```bash
+   ./git-remote-protocol.sh cursor .
+   ```
+
+2. 确认无误后加 `--apply`，在提示处输入 `y`：
+
+   ```bash
+   ./git-remote-protocol.sh cursor . --apply
+   ```
+
+3. 抽查一个仓：
+
+   ```bash
+   git -C invest-rss-worker remote -v
+   ```
+
+4. 若要切回 GitHub：
+
+   ```bash
+   ./git-remote-protocol.sh github . --apply
+   ```
+
+## 常见问题
+
+**`scripts` 显示 SKIP（无 URL）**  
+该目录有 `.git` 但未配置 `origin`，属正常跳过。
+
+**切到 `cursor` 后 `git push` 失败**  
+先 `origin auth login`；确认该仓已在 cursor.com/codebase Sync from GitHub。
+
+**meta 仓 `github` 模式 SKIP**  
+`cloudflare_work` 无默认 GitHub 映射；需手动 `git remote set-url` 或先 `cursor` 切换时保存过 `githuburl`。
+
+**SSH 写入后 `git fetch` 失败**  
+检查本机 SSH key 是否已加到对应 GitHub 账号，以及 `ssh -T git@github.com` 是否通。
+
+**只想改某一个仓**  
+对单仓直接：`git -C <repo> remote set-url origin <url>`；本脚本面向批量。
+
+**`--yes` 单独使用报错**  
+`--yes` 必须与 `--apply` 一起用，防止误跳过确认。
