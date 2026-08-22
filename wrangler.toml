@@ -1,0 +1,7 @@
+# Cloudflare Builds 静态站：仅上传 dist/，无 Worker 脚本。
+# name 须与 Builds 项目 Worker Name 一致（当前为 docs-site）。
+name = "docs-site"
+compatibility_date = "2026-08-22"
+
+[assets]
+directory = "./dist"
