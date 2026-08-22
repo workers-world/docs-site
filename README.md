@@ -51,8 +51,11 @@ import { Card } from '@astrojs/starlight/components';
 | --- | --- |
 | Framework | Astro |
 | Build command | `npm run build` |
-| Output | `dist` |
+| Build output directory | `dist` |
+| **Deploy command** | **留空**（不要填 `wrangler deploy`） |
 | Production branch | `master` |
+
+> **常见部署错误**：若 Deploy command 为 `npx wrangler deploy`，构建会成功但部署失败（`Missing entry-point to Worker script`）。本站是**静态 Pages**，不是 Worker；Git 集成会在 build 后自动上传 `dist/`，无需 deploy 步骤。
 
 上线前请配置 Cloudflare Access（本 README 不含策略细节）。
 
