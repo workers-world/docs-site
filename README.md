@@ -21,6 +21,30 @@ npm run build
 ./scripts/migrate-docs.sh
 ```
 
+迁移脚本输出为 `.mdx`；见下文格式说明。
+
+## `.md` 与 `.mdx`
+
+本站内容文件使用 **`.mdx`**（Markdown + JSX）。与纯 **`.md`** 的对比如下：
+
+| | `.md` | `.mdx` |
+| --- | --- | --- |
+| 语法 | 标准 Markdown（标题、列表、链接、代码块、表格等） | 兼容 Markdown，并可嵌入 JSX 组件 |
+| Starlight | 支持 | 支持（本站默认） |
+| 组件 | 不支持 `import` 与自定义 UI | 可 `import` 并使用 Starlight 组件，如 `<Card>`、`<Tabs>` |
+
+示例（仅 `.mdx` 可做）：
+
+```mdx
+import { Card } from '@astrojs/starlight/components';
+
+普通段落。
+
+<Card title="提示">组件内容</Card>
+```
+
+当前从 meta 仓迁入的文档**仅为普通 Markdown**，用 `.md` 也能构建；统一用 `.mdx` 是为了与 Starlight/Astro 内容集合一致，且日后加组件无需改后缀。
+
 ## Cloudflare Pages
 
 | 字段 | 值 |
