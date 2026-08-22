@@ -45,17 +45,32 @@ import { Card } from '@astrojs/starlight/components';
 
 当前从 meta 仓迁入的文档**仅为普通 Markdown**，用 `.md` 也能构建；统一用 `.mdx` 是为了与 Starlight/Astro 内容集合一致，且日后加组件无需改后缀。
 
-## Cloudflare Pages
+## Cloudflare 部署
+
+本站为**纯静态** Starlight（`output: static`），**不要**加 `@astrojs/cloudflare` 适配器。
+
+### 方案 A：Cloudflare Builds（当前）
+
+Dashboard 若 **Deploy command** 为 `npx wrangler deploy`，仓库内须有 [`wrangler.toml`](wrangler.toml)（仅 `[assets]`，无 `main`），否则 wrangler 会误跑 `astro add cloudflare` 并报 `public/.assetsignore` 缺失。
 
 | 字段 | 值 |
 | --- | --- |
 | Framework | Astro |
 | Build command | `npm run build` |
 | Build output directory | `dist` |
-| **Deploy command** | **留空**（不要填 `wrangler deploy`） |
+| Deploy command | `npx wrangler deploy` |
+| Worker Name | `docs-site`（与 `wrangler.toml` 的 `name` 一致） |
 | Production branch | `master` |
 
-> **常见部署错误**：若 Deploy command 为 `npx wrangler deploy`，构建会成功但部署失败（`Missing entry-point to Worker script`）。本站是**静态 Pages**，不是 Worker；Git 集成会在 build 后自动上传 `dist/`，无需 deploy 步骤。
+### 方案 B：Pages Git 集成
+
+| 字段 | 值 |
+| --- | --- |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| **Deploy command** | **留空** |
+
+Git 集成会在 build 后自动上传 `dist/`，无需 wrangler。
 
 上线前请配置 Cloudflare Access（本 README 不含策略细节）。
 
