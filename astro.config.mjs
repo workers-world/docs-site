@@ -15,7 +15,7 @@ export default defineConfig({
 			},
 			sidebar: [
 				{
-					label: '入门',
+					label: '项目介绍',
 					autogenerate: { directory: 'getting-started' },
 				},
 				{
@@ -23,12 +23,32 @@ export default defineConfig({
 					autogenerate: { directory: 'architecture' },
 				},
 				{
-					label: '运维',
+					label: 'Worker总览',
+					autogenerate: { directory: 'workers' },
+				},
+				{
+					label: 'CI/CD',
 					autogenerate: { directory: 'operations' },
 				},
 				{
-					label: 'Worker',
-					autogenerate: { directory: 'workers' },
+					label: '开发规范',
+					autogenerate: { directory: 'develop-specifications' },
+				},
+				{
+					label: '开发日志',
+					autogenerate: { directory: 'develop-logs' },
+				},
+				{
+					label: 'Language',
+					autogenerate: { directory: 'language' },
+				},
+				{
+					label: 'Cloudflare',
+					autogenerate: { directory: 'cloudflare' },
+				},
+				{
+					label: '引用',
+					autogenerate: { directory: 'references' },
 				},
 			],
 		}),

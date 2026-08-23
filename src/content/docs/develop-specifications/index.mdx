@@ -1,0 +1,30 @@
+---
+title: 开发规范
+description: 开发规范
+---
+
+# 入门
+
+## 本地开发本站
+
+```bash
+cd docs-site
+npm ci
+npm run dev    # http://localhost:4321
+npm run build  # 提交前验证
+```
+
+## 贡献流程
+
+1. 从 `master` 切 `dev_00_01_00`
+2. 在 `src/content/docs/` 增改文档
+3. 开 PR → CF Pages preview 构建检查
+4. 合入 `master` → production 构建
+
+## 文档迁移原则
+
+| 做 | 不做 |
+| --- | --- |
+| 架构图、集成说明、运维 runbook | 含密钥/Token 公式的原文 |
+| 各 Worker 摘要 + 子仓 `docs/` 链接 | `.cursor/plans/` 草稿全文 |
+| 文首加权威副本指针 | 自动全量同步 meta `docs/` |
