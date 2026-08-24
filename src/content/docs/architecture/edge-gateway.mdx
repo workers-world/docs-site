@@ -1,18 +1,18 @@
 ---
 title: Edge Gateway 路由
+description: 公网 API 经 api.mailworld.uk 前缀转发的路由清单与约定。
 ---
 
-> 权威副本：`cloudflare_work/docs/edge-gateway-routes.md`
+> 权威副本：meta 仓 `cloudflare_work/docs/edge-gateway-routes.md`  
+> 权威数据：meta 仓 `docs/edge-gateway-routes.json`（本站不托管 JSON）。
 
-
-权威数据：[edge-gateway-routes.json](./edge-gateway-routes.json)。  
-改 JSON 后执行：
+改 JSON 后在 **meta 仓**执行：
 
 ```bash
 node docs/generate-waf-from-routes.mjs
 ```
 
-会覆盖 [generated/waf-expressions.md](./generated/waf-expressions.md)，并同步 `edge-gateway-worker/src/routes.json`（若目录存在）。
+会覆盖 `docs/generated/waf-expressions.md`，并同步 `edge-gateway-worker/src/routes.json`（若目录存在）。
 
 ## 目标
 
@@ -54,10 +54,10 @@ node docs/generate-waf-from-routes.mjs
 
 见 JSON 中 `via: independent`：deploy-tracker、market-qa-agent、market-data-mcp、subscribe、r2-image-transform。
 
-## 相关
+## 相关（meta 仓路径）
 
-- **上线计划**：[edge-gateway-rollout.md](./edge-gateway-rollout.md)
-- 迁客户端 / 拆旧域名：[edge-gateway-decommission.md](./edge-gateway-decommission.md)
-- WAF 操作：[waf-custom-rules.md](./waf-custom-rules.md)
-- 生成表达式：[generated/waf-expressions.md](./generated/waf-expressions.md)
-- Secrets / 客户端 URL：[secrets-inventory.md](./secrets-inventory.md)
+- 上线计划：`docs/edge-gateway-rollout.md`
+- 迁客户端 / 拆旧域名：`docs/edge-gateway-decommission.md`
+- WAF 操作：`docs/waf-custom-rules.md`
+- 生成表达式：`docs/generated/waf-expressions.md`
+- Secrets / 客户端 URL：`docs/secrets-inventory.md`

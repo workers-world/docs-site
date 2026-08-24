@@ -1,15 +1,14 @@
 ---
 title: 应急发布回退
+description: Git/Gitea/GitHub 长时间不可用时的本地 wrangler deploy 应急流程。
 ---
 
-> 权威副本：`cloudflare_work/docs/release-fallback.md`
-
+> 权威副本：meta 仓 `cloudflare_work/docs/release-fallback.md`
 
 > 常规路径仍是：Gitea 同步代码 →（手动）GitHub `dev_*` → Release PR（verify / qodana / OCR / auto-merge）→ **CF Builds**。  
 > 本文仅描述 **Git / Gitea / GitHub 长时间不可用、必须先上线** 时的本地直发。
 
-权威 CI/CD 说明见 [deploy-tracker-worker/docs/setup.md](../deploy-tracker-worker/docs/setup.md) §7、[workers-world-dot-github/docs/cloudflare-builds-template.md](../workers-world-dot-github/docs/cloudflare-builds-template.md)。  
-Gitea 中转见 [deploy-tracker-worker/gitea/README.md](../deploy-tracker-worker/gitea/README.md)。
+权威 CI/CD 说明见各仓 docs（deploy-tracker-worker、workers-world/.github），不在本站托管。
 
 ---
 
@@ -27,38 +26,42 @@ Gitea 中转见 [deploy-tracker-worker/gitea/README.md](../deploy-tracker-worker
 
 ## 步骤
 
-1. **确认本机 Cloudflare 凭证**  
-   `CLOUDFLARE_API_TOKEN` / `wrangler login` 已可用（与生产账号一致）。
+<Steps>
+  <Step>
+    **确认本机 Cloudflare 凭证**
 
-2. **依赖**  
-   - 优先：本地已 `npm ci`，SDK 可用 `file:../framework_sdk_worker` 旁路联调。  
-   - 若 `package.json` 指向 GitHub Packages，需本机 `NODE_AUTH_TOKEN` 或临时改回 `file:`（**勿提交**临时改动，或事后还原）。
+    `CLOUDFLARE_API_TOKEN` / `wrangler login` 已可用（与生产账号一致）。
+  </Step>
+  <Step>
+    **依赖**
 
-3. **门禁（本地）**
+    - 优先：本地已 `npm ci`，SDK 可用 `file:../framework_sdk_worker` 旁路联调。
+    - 若 `package.json` 指向 GitHub Packages，需本机 `NODE_AUTH_TOKEN` 或临时改回 `file:`（**勿提交**临时改动，或事后还原）。
+  </Step>
+  <Step>
+    **门禁（本地）**
 
-```bash
-cd <worker>
-npm run check && npm test
-```
+    ```bash
+    cd <worker>
+    npm run check && npm test
+    ```
+  </Step>
+  <Step>
+    **部署**
 
-4. **部署**
+    ```bash
+    npm run deploy
+    # 或 npx wrangler deploy
+    ```
 
-```bash
-npm run deploy
-# 或 npx wrangler deploy
-```
+    有 D1 的 Worker 另按 CF Builds 模板执行 `wrangler d1 migrations apply … --remote`。
+  </Step>
+  <Step>
+    **冒烟**
 
-5. **有 D1 / 特殊 Deploy command 的 Worker**（与 CF Builds 模板对齐）：
-
-| Worker | 额外命令 |
-|--------|----------|
-| counter-worker | `npx wrangler d1 migrations apply counter-sequence --remote` |
-| deploy-tracker-worker | `npx wrangler d1 migrations apply deploy-tracker --remote` |
-| email-rule-worker | `npx wrangler d1 migrations apply email-rule --remote`（DB_EMAIL_RULE 摘要落库；R2 bucket `email-rule-digests` 需手工创建） |
-| fund-info-worker | 日常勿全量重建容器；见该仓周更 workflow |
-
-6. **冒烟**  
-   `curl` health / 关键业务路径；需要时 `wrangler tail`。
+    `curl` health / 关键业务路径；需要时 `wrangler tail`。
+  </Step>
+</Steps>
 
 ---
 
@@ -66,9 +69,9 @@ npm run deploy
 
 网络恢复后：
 
-1. 将本次本地部署对应的 commit **推到 Gitea**（`relay/dev_*`）并确认 mirror 到 GitHub。  
-2. 手动 FF `relay/dev_*` → `dev_*`（或网络好时 `git push github`），跑通 Release PR（verify / qodana / OCR / auto-merge），使 **GitHub `master` 与线上一致**。  
-3. 在 deploy-tracker Dashboard 核对是否出现对应 CF Builds / 必要时手工对账。  
+1. 将本次本地部署对应的 commit **推到 Gitea**（`relay/dev_*`）并确认 mirror 到 GitHub。
+2. 手动 FF `relay/dev_*` → `dev_*`（或网络好时 `git push github`），跑通 Release PR，使 **GitHub `master` 与线上一致**。
+3. 在 deploy-tracker Dashboard 核对是否出现对应 CF Builds / 必要时手工对账。
 4. 还原任何临时的 `file:` SDK / 未提交配置。
 
 未做事后对齐会导致：**下次 CF Builds 用旧 `master` 覆盖你本地刚修的线上**。
@@ -77,5 +80,5 @@ npm run deploy
 
 ## 与 Gitea 中转的关系
 
-- Gitea **只同步代码**，不替代本应急通道。  
+- Gitea **只同步代码**，不替代本应急通道。
 - 应急 deploy **不经过** Gitea / GHA；恢复后仍以 GitHub `master` + CF Builds 为权威发布轨。
