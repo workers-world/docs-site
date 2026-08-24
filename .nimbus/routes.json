@@ -3,6 +3,8 @@
   "base": "/",
   "knownRoutes": [
     "/",
+    "/ai",
+    "/ai/prompt",
     "/architecture",
     "/architecture/analysis-engine",
     "/architecture/edge-gateway",

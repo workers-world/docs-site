@@ -21,6 +21,7 @@ async function autogenSections() {
 		language: "Language",
 		cloudflare: "Cloudflare",
 		references: "引用",
+		"ai": "AI",
 	};
 	return dirs
 		.filter((entry) => entry.isDirectory())
@@ -59,6 +60,7 @@ const markdown = {
 
 export default defineConfig({
 	site: nimbusConfig.site,
+	devToolbar: { enabled: false },
 	markdown,
 	integrations: [
 		react(),

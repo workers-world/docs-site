@@ -1,0 +1,92 @@
+---
+title: 提示词
+description: 面向 AI 助手的可复用提示词（Observability 慢 span 分析等）
+---
+
+本文收录在本仓运维/排障中**会反复使用**的提示词。复制到 Cursor（或附上导出的 JSON）即可，Agent 应结合 `graft ask` 对照代码落点。
+
+## Cloudflare Observability：慢 span / 高 durationMS 分析
+
+### 适用场景
+
+- Dashboard → Workers Observability → 按 `durationMS`（或 trace duration）过滤慢请求
+- 导出 trace / logs JSON（常为 OTEL span 数组），询问：**是否正常？瓶颈在哪？能否优化？**
+- 与某条 trace 对照代码里的 `for` 循环、`await` 串行、队列 consumer 等
+
+### 提示词（复制使用）
+
+```text
+我在 Cloudflare Workers Observability 里筛选了过去 N 小时的慢 span（条件：durationMS > {阈值}ms），
+导出了 JSON 日志（已附在对话中 / 路径：{文件路径}）。
+
+请按下面步骤分析，用中文回答：
+
+1. **数据概览**
+   - 总条数、时间范围、涉及的 Worker / spanName（queue、POST、email、kv_put、scheduled、jsrpc 等）
+   - 按 service 汇总：条数、min/max/avg durationMS
+
+2. **与代码对照**
+   - 用 graft ask / 读源码，把每条慢 span 类型映射到具体 consumer、cron、路由或 SDK 调用
+   - 若用户提到某文件/函数（如 notify-worker digest-consumer sendDigestGroups），说明 trace 里哪段 span 对应哪层循环
+
+3. **是否正常**
+   - 区分：**预期慢**（LLM 推理、外部 API、故意 sleep 限速） vs **可优化**（串行 KV put、batch 内可并行的独立 I/O）
+   - 对 queue span：看 batch_size、queue name、cpu_time_ms vs wall_time_ms（CPU 极低 + wall 极高 → 多为 I/O 或 sleep，不是算力瓶颈）
+
+4. **根因与优化**
+   - 给出 1～3 个最高 ROI 项（含预期收益量级，如「15 次串行 KV ~3s → 并行 ~0.3s」）
+   - 若已有未 deploy 的修复，说明如何从下一轮 trace 验证（kv_put startTime 重叠、queue wall_time 下降）
+   - 禁止建议 Agent 自行 wrangler deploy
+
+5. **输出格式**
+   - 总览表（Worker | span | 是否正常 | 说明）
+   - 针对用户最关心的 Worker 单独展开
+   - 优化优先级 P0/P1/P2
+
+仓库上下文（cloudflare_work）：
+- notify digest：`notify-worker/src/queue/digest-consumer.ts`（分组发信 + confirmSent KV）
+- quality 限速：`orchestrator-worker/src/queue/quality-incident-consumer.ts`（CAPTURE_TRIGGER_INTERVAL_MS=12000）
+- LLM pending：`email-rule-llm-pending`、`invest-llm-pending` 队列
+- deploy-tracker：`*/20` cron 跑 GHA stats + reconcile
+- 规范：docs/quality-ops.md、notify-worker AGENTS.md
+```
+
+将 `{阈值}`、`{文件路径}`、`N` 换成实际值；有具体 traceId 或 Worker 时一并写上。
+
+### 导出与提问技巧
+
+| 步骤 | 说明 |
+|------|------|
+| 过滤 | Logs / Traces 用 `durationMS > 3000` 等；注意筛的是**单 span**，不是整 trace 所有子 span |
+| 导出 | 导出 JSON；大文件可只保留慢 trace 或单个 `traceId` 相关条目 |
+| 附加上下文 | 写明筛选条件、是否已 deploy 某修复、怀疑的代码路径 |
+| 对照 trace | 用 `invocation.sequence` 排序；queue 父 span 的 duration 常包含子 span 累计 wall time |
+
+### 本仓已知「慢但常正常」速查
+
+| Worker / 队列 / Cron | span | 典型耗时 | 原因 |
+|----------------------|------|----------|------|
+| llm-gateway-worker | `POST` `/v1/chat/invest` / `general` | 3–11s | LLM 推理 |
+| email-rule-worker | `email-rule-llm-pending` queue | 10–28s（batch≈2） | 每条 LLM pending 串行调 gateway |
+| invest-rss-worker | `invest-llm-pending` queue | 10–37s | 同上 |
+| invest-rss-worker | `email` | 3–24s | 入站邮件处理（拉正文等） |
+| advisor-worker | `advisor-ingest` queue | 20–43s（batch≈5） | ingest + LLM 链 |
+| orchestrator-worker | `quality-incidents` queue | **~90–115s**（batch≈10） | 每条 incident 触发 Capture 前 `sleep(12s)` 限速 |
+| deploy-tracker-worker | `scheduled` `*/20` | **~60–66s** | 多 repo GitHub API（GHA stats + reconcile） |
+| gold-price-worker | `scheduled` / `fetch` | 5–7s | 定时拉外部金价 |
+| notify-worker | `notify-outbound` queue | 4–8s（batch 15–25） | digest 窗口整点批次；**串行 confirmSent 可优化**（已改并行 confirmSent，需 deploy 后验证） |
+
+### notify digest 专项（常对照 trace）
+
+整点 `:00` / `:30`（上海窗口）易出现 `notify-outbound` 慢 batch：
+
+1. `kv_get` / `kv_put` `quota:async:YYYY-MM-DD` — 日配额
+2. `send_email_builder` — 每组 digest 一封邮件（按 `ruleId:to` 分组）
+3. 多条 `kv_put` `custom:<msg-id>@...` — 每条消息的 `confirmSent`（**不同 key 可并行**）
+
+优化后验证：同一 batch 下多个 `kv_put` 的 `startTime` 应重叠，queue `wall_time` 应明显低于 `batch_size × 200ms`。
+
+### 相关文档
+
+- [质量运维](/operations/quality-ops/) — quality-incidents 限速与 Capture
+- [平台使用技巧](/cloudflare/platform_devops/) — Observability 日志查询

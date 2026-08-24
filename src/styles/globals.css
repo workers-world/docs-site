@@ -295,11 +295,248 @@
 	}
 }
 
+/* Classed Shiki tokens set --shiki-light/--shiki-dark once in _nimbus/shiki.css. */
+pre.astro-code span {
+	color: var(--shiki-light, inherit);
+}
+[data-mode="dark"] pre.astro-code span {
+	color: var(--shiki-dark, inherit);
+}
+
+/* Copy button injected by codeCopy(). */
+.nb-code-copy {
+	position: absolute;
+	top: 0.5rem;
+	right: 0.5rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.75rem;
+	height: 1.75rem;
+	margin: 0;
+	padding: 0;
+	border: 1px solid var(--nb-border);
+	border-radius: 0.375rem;
+	background: var(--nb-card);
+	color: var(--nb-muted-foreground);
+	cursor: pointer;
+	opacity: 0;
+	transition:
+		opacity 0.15s ease,
+		color 0.15s ease,
+		background 0.15s ease;
+	z-index: 2;
+}
+.nb-code-figure:hover .nb-code-copy,
+.nb-code-copy:focus-visible {
+	opacity: 1;
+}
+.nb-code-figure-titled .nb-code-copy {
+	top: 2.5rem;
+}
+.nb-code-copy:hover {
+	color: var(--nb-foreground);
+	background: var(--nb-muted);
+}
+.nb-code-copy svg {
+	width: 0.875rem;
+	height: 0.875rem;
+}
+.nb-code-copy[data-state="copied"] {
+	color: var(--nb-success);
+}
+
+/* Premium code block framing (figure wrapper, title bar, line highlights). */
+.nb-code-figure {
+	position: relative;
+	margin: 1rem 0;
+	border: 1px solid var(--nb-border);
+	border-radius: 0.5rem;
+	background-color: var(--nb-card);
+	overflow: hidden;
+}
+.nb-code-figure > pre.astro-code {
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+	background-color: transparent;
+}
+.nb-code-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.5rem 0.875rem;
+	border-bottom: 1px solid var(--nb-border);
+	background: var(--nb-surface-sunken);
+	font-family: var(--nb-font-mono);
+	font-size: 0.75rem;
+	line-height: 1.4;
+}
+.nb-code-title-name {
+	color: var(--nb-foreground);
+	font-weight: 500;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.nb-code-title-lang {
+	flex-shrink: 0;
+	padding: 0.0625rem 0.375rem;
+	border-radius: 0.25rem;
+	background: var(--nb-muted);
+	color: var(--nb-muted-foreground);
+	font-size: 0.6875rem;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+.nb-code-figure[data-nb-lang]:not(.nb-code-figure-titled)::before {
+	content: attr(data-nb-lang);
+	position: absolute;
+	top: 0.5rem;
+	right: 0.625rem;
+	padding: 0.0625rem 0.375rem;
+	border-radius: 0.25rem;
+	background: var(--nb-muted);
+	color: var(--nb-muted-foreground);
+	font-family: var(--nb-font-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	pointer-events: none;
+	opacity: 0.75;
+	transition: opacity 0.15s ease;
+	z-index: 1;
+}
+.nb-code-figure:hover::before {
+	opacity: 0;
+}
+.nb-code-figure[data-nb-lang="text"]::before,
+.nb-code-figure[data-nb-lang="plaintext"]::before,
+.nb-code-figure[data-nb-lang="plain"]::before,
+.nb-code-figure[data-nb-lang="txt"]::before {
+	display: none;
+}
+pre.astro-code code {
+	display: block;
+	width: max-content;
+	min-width: 100%;
+}
+pre[data-nb-line-numbers] code {
+	counter-reset: nb-line;
+}
+pre[data-nb-line-numbers] .line {
+	counter-increment: nb-line;
+}
+pre[data-nb-line-numbers] .line::before {
+	content: counter(nb-line);
+	display: inline-block;
+	width: 2ch;
+	margin-right: 1.25rem;
+	text-align: right;
+	color: color-mix(in oklch, var(--nb-muted-foreground) 60%, transparent);
+	user-select: none;
+}
+pre.astro-code .line {
+	display: inline-block;
+	width: 100%;
+	padding-inline: 1rem;
+	margin-inline: -1rem;
+	box-sizing: content-box;
+}
+pre.astro-code .line.highlighted {
+	background: color-mix(in oklch, var(--nb-info) 12%, transparent);
+	box-shadow: inset 2px 0 0 var(--nb-info);
+}
+pre.astro-code .line.diff {
+	position: relative;
+}
+pre.astro-code .line.diff.add {
+	background: color-mix(in oklch, var(--nb-success) 10%, transparent);
+	box-shadow: inset 2px 0 0 var(--nb-success);
+}
+pre.astro-code .line.diff.remove {
+	background: color-mix(in oklch, var(--nb-danger) 10%, transparent);
+	box-shadow: inset 2px 0 0 var(--nb-danger);
+}
+pre.astro-code .line.diff.add::before,
+pre.astro-code .line.diff.remove::before {
+	position: absolute;
+	left: 0.25rem;
+	color: var(--nb-muted-foreground);
+	font-weight: 600;
+}
+pre.astro-code .line.diff.add::before {
+	content: "+";
+	color: var(--nb-success);
+}
+pre.astro-code .line.diff.remove::before {
+	content: "−";
+	color: var(--nb-danger);
+}
+pre.astro-code.has-focused .line:not(.focused) {
+	opacity: 0.45;
+	filter: blur(0.25px);
+	transition:
+		opacity 0.2s ease,
+		filter 0.2s ease;
+}
+pre.astro-code.has-focused:hover .line:not(.focused) {
+	opacity: 1;
+	filter: none;
+}
+pre.astro-code .line.highlighted.error {
+	background: var(--nb-danger-muted);
+	box-shadow: inset 2px 0 0 var(--nb-danger);
+}
+pre.astro-code .line.highlighted.warning {
+	background: var(--nb-warning-muted);
+	box-shadow: inset 2px 0 0 var(--nb-warning);
+}
+pre.astro-code .highlighted-word {
+	padding: 0.0625rem 0.25rem;
+	margin: -0.0625rem -0.125rem;
+	border-radius: 0.25rem;
+	background: color-mix(in oklch, var(--nb-info) 18%, transparent);
+	box-shadow: 0 0 0 1px color-mix(in oklch, var(--nb-info) 30%, transparent);
+}
+pre.astro-code[data-nb-wrap] code {
+	width: 100%;
+	min-width: 0;
+}
+pre.astro-code[data-nb-wrap] .line {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+}
+.nb-code-figure[data-nb-frame="terminal"] {
+	padding-top: 1.5rem;
+}
+.nb-code-figure[data-nb-frame="terminal"]::after {
+	content: "";
+	position: absolute;
+	top: 0.625rem;
+	left: 0.75rem;
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 50%;
+	background: var(--nb-muted-foreground);
+	box-shadow:
+		0.75rem 0 0 var(--nb-muted-foreground),
+		1.5rem 0 0 var(--nb-muted-foreground);
+	opacity: 0.45;
+	pointer-events: none;
+}
+
+body:not(:has([data-mobile-sidebar])) [data-menu-btn] {
+	display: none;
+}
+
 /* Site chrome fallbacks for minimal BaseLayout */
 body { margin: 0; font-family: var(--nb-font-sans); background: var(--nb-background); color: var(--nb-foreground); line-height: 1.6; }
 a { color: var(--nb-link); }
 .prose img { max-width: 100%; height: auto; }
 .prose table { border-collapse: collapse; width: 100%; }
 .prose th, .prose td { border: 1px solid var(--nb-border); padding: 0.4rem 0.6rem; }
-pre { background: var(--nb-muted); padding: 0.85rem 1rem; overflow-x: auto; border-radius: 0.4rem; }
+pre:not(.astro-code) { background: var(--nb-muted); padding: 0.85rem 1rem; overflow-x: auto; border-radius: 0.4rem; }
 code { font-family: var(--nb-font-mono); font-size: 0.92em; }
