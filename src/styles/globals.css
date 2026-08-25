@@ -532,6 +532,52 @@ body:not(:has([data-mobile-sidebar])) [data-menu-btn] {
 	display: none;
 }
 
+/* ---- Image zoom ---- */
+.medium-zoom-overlay {
+	z-index: 200;
+}
+.medium-zoom-image--opened {
+	z-index: 201;
+}
+@media (prefers-reduced-motion: reduce) {
+	html .medium-zoom-image,
+	html .medium-zoom-image--opened,
+	html .medium-zoom-overlay {
+		transition-duration: 1ms !important;
+	}
+}
+.nb-zoom-close {
+	position: fixed;
+	inset: 20px 20px auto auto;
+	z-index: 202;
+	display: grid;
+	place-items: center;
+	width: 44px;
+	height: 44px;
+	padding: 10px;
+	border: 2px solid var(--nb-border-strong);
+	border-radius: 50%;
+	background-color: var(--nb-card);
+	color: var(--nb-foreground);
+	cursor: zoom-out;
+	opacity: 0;
+}
+.nb-zoom-close svg {
+	width: 100%;
+	height: 100%;
+}
+.nb-zoom-close--open {
+	opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+	.nb-zoom-close {
+		transition: opacity 300ms;
+	}
+}
+.docs-content img[role="button"] {
+	cursor: zoom-in;
+}
+
 /* Site chrome fallbacks for minimal BaseLayout */
 body { margin: 0; font-family: var(--nb-font-sans); background: var(--nb-background); color: var(--nb-foreground); line-height: 1.6; }
 a { color: var(--nb-link); }
