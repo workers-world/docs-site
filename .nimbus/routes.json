@@ -4,6 +4,8 @@
   "knownRoutes": [
     "/",
     "/ai",
+    "/ai/cursor",
+    "/ai/greptile",
     "/ai/prompt",
     "/architecture",
     "/architecture/analysis-engine",
@@ -23,12 +25,14 @@
     "/language/ts",
     "/operations",
     "/operations/git-remote",
+    "/operations/promote",
     "/operations/quality-ops",
     "/operations/release-fallback",
     "/references",
     "/workers",
     "/workers/deploy-tracker",
     "/workers/invest-rss",
+    "/workers/notify-worker",
     "/workers/orchestrator"
   ],
   "opaqueNamespaces": []
