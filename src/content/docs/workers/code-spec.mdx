@@ -200,4 +200,45 @@ export function listRecentTurnRows(sql, limit) {
 ## 9. 增量迁移
 
 - **touch 文件时**把 inline SQL 迁入 store；不开「全仓 SQL 重构」PR
-- 已有 Worker 可保持旧结构，新改动按本规范执行
+- 2026-08 全仓整改批次已完成（见 §10）；此后新改动仍按本规范执行
+
+## 10. 合规检查清单
+
+扫描命令（meta 根目录，排除 `cloudflare-os`）：
+
+```bash
+# routes / index / Agent 内不得 prepare
+rg '\.prepare\(' --glob '**/src/routes/**' --glob '**/src/index.ts' --glob '**/src/*agent*.ts'
+
+# 不得残留根目录 db.ts
+find . -path '*/cloudflare-os/*' -prune -o -name 'db.ts' -print
+
+# services 外不得 inline 模板 SQL（cron 可调用 store）
+rg -l 'prepare\(\s*`' --glob '*.{ts,js}' | rg -v '/services/|/test/|cloudflare-os'
+```
+
+期望：**上述三条均无命中**；D1/DO 读写仅在 `services/*-store.ts` / `*-query.ts`（或 JS 等价路径如 `r2-image-transform-worker/services/`）。
+
+### 整改状态（2026-08）
+
+| Worker | 状态 | 主要 store |
+|--------|------|------------|
+| market-qa-agent | ✅ 样板 | `qa-history-store.ts`（DO SQLite） |
+| audit-log-worker | ✅ | `maintenance-log-store.ts` |
+| browser_run | ✅ | `task-store.ts` |
+| counter-worker | ✅ | `generate-id.ts` / `d1-sequence-store.ts` |
+| fund-monitor-worker | ✅ | `d1-store.ts` |
+| config-agent | ✅ | `operation-log-store.ts` |
+| llm-gateway-worker | ✅ | `gateway-events-store.ts` |
+| email-rule-worker | ✅ | `digest-store.ts` |
+| advisor-worker | ✅ | `advice-store.ts`、`quota.ts` |
+| decision-desk-worker | ✅ | `draft-store.ts`、`signal-buffer.ts` |
+| lib-newbook-worker | ✅ | `newbook-store.ts`、`notify-clc-store.ts` |
+| my-blog-subscribe-worker | ✅ | `subscriber-store.ts` 等 |
+| container-mirror-host | ✅ | `job-store.ts` |
+| invest-rss-worker | ✅ | 多 `services/*` QUERIES 化 |
+| deploy-tracker-worker | ✅ | 全 `services/*` + cron 经 store |
+| r2-image-transform-worker | ✅ | `services/image-access-store.js` |
+| cloudflare-os | ⏸ 暂缓 | 与业务 Worker 规范独立 |
+
+各 Worker 目录执行 `npm run check` 通过后方可合并。
