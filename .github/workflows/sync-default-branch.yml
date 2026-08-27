@@ -18,7 +18,7 @@ jobs:
   sync:
     # 显式收紧 GITHUB_TOKEN（勿 contents: write）；PATCH default_branch 走 PAT
     permissions: {}
-    uses: workers-world/.github/.github/workflows/worker-sync-default-dev-branch.yml@actions/v0.4.33
+    uses: workers-world/.github/.github/workflows/worker-sync-default-dev-branch.yml@actions/v0.4.34
     secrets: inherit
     with:
       push_branch: ${{ github.ref_name }}
