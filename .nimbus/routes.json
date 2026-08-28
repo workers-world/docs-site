@@ -5,6 +5,7 @@
     "/",
     "/ai",
     "/ai/cursor",
+    "/ai/drawio",
     "/ai/greptile",
     "/ai/prompt",
     "/architecture",

@@ -9,25 +9,25 @@ description: notify-worker
 为什么要进行这个优化：发送邮件通知是底层基础设施，是所有上层业务组件的公共复用组件。如果可以减少它的耗时，可以惠及所有上层业务。
 
 现在先来看下改造前后的对比图
-![](./img/old_and_new.png)
+![notify-worker 队列耗时改造前后对比（Observability 散点图）](./img/old_and_new.png)
 
 
 主要涉及两方面的修改
 
 1. 针对kv put的优化：串行改为并行
 	改造前
-	![](./img/kv_put_old.png)
+	![KV put 改造前：多次写入串行瀑布](./img/kv_put_old.png)
 
 	改造后
-	![](./img/kv_put_new.png)
+	![KV put 改造后：多次写入并行](./img/kv_put_new.png)
 
 2. 针对send_email_builder的优化：串行改为并行
 
 	改造前
-	![](./img/send_email_builder_old.png)
+	![send_email_builder 改造前：两组任务串行](./img/send_email_builder_old.png)
 
 	改造后
-	![](./img/send_email_builder_new.png)
+	![send_email_builder 改造后：构建邮件与 KV put 并行](./img/send_email_builder_new.png)
 
 	从下面这张图耗时变得很平均, span多和span少的耗时都是差不多。
-	![](./img/span.png)
+	![改造后 queue 的 Duration 与 Span 数量：耗时更均匀](./img/span.png)
