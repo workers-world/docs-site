@@ -12,15 +12,15 @@ import nimbus, {
 async function autogenSections() {
 	const dirs = await readdir("./src/content/docs/", { withFileTypes: true });
 	const labelMap = {
-		"getting-started": "项目介绍",
-		architecture: "架构",
-		workers: "Worker总览",
-		operations: "CI/CD",
+		"getting-started": "入门",
+		"architecture": "架构",
+		"workers": "Worker总览",
+		"operations": "CI/CD",
 		"develop-specifications": "开发规范",
 		"develop-logs": "开发日志",
-		language: "Language",
-		cloudflare: "Cloudflare",
-		references: "引用",
+		"language": "Language",
+		"cloudflare": "Cloudflare",
+		"references": "引用",
 		"ai": "AI",
 	};
 	return dirs
