@@ -12,32 +12,50 @@ description: 术语
 
 
 
+### invocation
 ![Workers 指标卡片：Invocations 与 Subrequests](./img/img.png)
 
-invocation
 外部针对worker的请求
 
 subrequest
 worker内部向外发出的请求
 
+### request id
+![页面页脚中的 Cloudflare Ray ID](./img/ray_id.png)
 
+这个在日志的链路中就是 request id
 
-Gradual deployments
+### Gradual deployments
 渐进式部署
-
-
 
 切流量的那种方式
 https://developers.cloudflare.com/workers/versions-and-deployments/gradual-deployments/
 
 
-
-
-request id
-![页面页脚中的 Cloudflare Ray ID](./img/ray_id.png)
-
-这个在日志的链路中就是 request id
-
-
-Flagship
+### Flagship
 ![旗舰模型与轻量模型对比说明](./img/flagship.png)
+
+### 兼容日期
+![兼容日期](./img/compatibility_date.png)
+![兼容日期2](./img/compatibility_date2.png)
+
+https://blog.cloudflare.com/backwards-compatibility-in-cloudflare-workers/
+
+看了这篇博客
+我认为每次部署都要检查下日期
+
+https://blog.cloudflare.com/workerd-open-source-workers-runtime/
+
+### workerd
+一个始终向后兼容的运行时库
+
+workerd
+worker daemon
+
+![workerd](./img/workerd.png)
+![workerd2](./img/workerd2.png)
+
+### tail worker
+![tail](./img/tail_worker.png)
+
+
