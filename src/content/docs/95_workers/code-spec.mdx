@@ -3,12 +3,12 @@ title: Worker 代码规范
 description: 目录分层、D1 / DO SQLite 持久层、业务与存储边界、Biome 风格约定。
 ---
 
-> 开发权威副本：`cloudflare_work/.cursor/rules/cloudflare-worker-*.mdc`  
+> 开发权威副本：`cloudflare_work/.cursor/rules/cloudflare-worker-*.mdc`
 > 本文是对外发布的精选摘要；规则变更时同步更新 Cursor rules 与本页。
 
 ## 1. 目标
 
-各 Worker 遵循同一套分层：**入口只做 wiring，业务在 `services/`，持久化集中在 `*-store.ts`**。  
+各 Worker 遵循同一套分层：**入口只做 wiring，业务在 `services/`，持久化集中在 `*-store.ts`**。
 Agent / Durable Object 类（如 `MarketQaAgent`）只做编排与业务规则，不在类内散落 SQL。
 
 ## 2. 标准目录
@@ -131,7 +131,7 @@ override onStart(): void {
 
 ## 6. 业务层 vs 持久层
 
-持久层只做：**建表、读写 raw rows、retention 剪除、Env 配置解析**。  
+持久层只做：**建表、读写 raw rows、retention 剪除、Env 配置解析**。
 业务规则留在 Agent / `services/` 编排层。
 
 | 职责 | 归属 | 示例 |
@@ -211,10 +211,10 @@ export function listRecentTurnRows(sql, limit) {
 rg '\.prepare\(' --glob '**/src/routes/**' --glob '**/src/index.ts' --glob '**/src/*agent*.ts'
 
 # 不得残留根目录 db.ts
-find . -path '*/cloudflare-os/*' -prune -o -name 'db.ts' -print
+find . -path '*/97_cloudflare-os/*' -prune -o -name 'db.ts' -print
 
 # services 外不得 inline 模板 SQL（cron 可调用 store）
-rg -l 'prepare\(\s*`' --glob '*.{ts,js}' | rg -v '/services/|/test/|cloudflare-os'
+rg -l 'prepare\(\s*`' --glob '*.{ts,js}' | rg -v '/services/|/test/|97_cloudflare-os'
 ```
 
 期望：**上述三条均无命中**；D1/DO 读写仅在 `services/*-store.ts` / `*-query.ts`（或 JS 等价路径如 `r2-image-transform-worker/services/`）。

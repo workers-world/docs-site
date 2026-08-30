@@ -90,7 +90,7 @@
 	--nb-grid-line: oklch(0 0 0 / 0.08);
 	--nb-grid-line-accent: oklch(0 0 0 / 0.12);
 
-	/* Footer palette — ported verbatim from cloudflare-dev-platform's
+	/* Footer palette — ported verbatim from 97_cloudflare-dev-platform's
 	 * marketing chrome so the global footer matches it 1:1 (light mode). */
 	--nb-accent-100: #ff5e1f; /* Aerospace Orange */
 	--nb-background-100: #ffffff; /* Floral White */
@@ -183,7 +183,7 @@
 	--nb-grid-line: oklch(1 0 0 / 0.1);
 	--nb-grid-line-accent: oklch(1 0 0 / 0.16);
 
-	/* Footer palette — dark mode (from cloudflare-dev-platform). */
+	/* Footer palette — dark mode (from 97_cloudflare-dev-platform). */
 	--nb-accent-100: #ff5e1f; /* Aerospace Orange (mode-invariant) */
 	--nb-background-100: #151414; /* Dark brown/black */
 	--nb-foreground-100: #f0e3de; /* Light beige/cream */
@@ -237,7 +237,7 @@
 	--color-danger: var(--nb-danger);
 	--color-danger-muted: var(--nb-danger-muted);
 
-	/* Footer palette (ported from cloudflare-dev-platform). Generates
+	/* Footer palette (ported from 97_cloudflare-dev-platform). Generates
 	 * bg-background-100 / text-foreground-100 / text-foreground-200 /
 	 * text-accent-100. */
 	--color-accent-100: var(--nb-accent-100);
@@ -278,7 +278,7 @@
 	}
 }
 
-/* Footer helpers ported from cloudflare-dev-platform. `text-tertiary` is a
+/* Footer helpers ported from 97_cloudflare-dev-platform. `text-tertiary` is a
  * custom utility there (not a Tailwind color), and `px-section` is their
  * single source of truth for responsive horizontal section padding. */
 @utility text-tertiary {

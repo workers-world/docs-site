@@ -23,8 +23,8 @@ graft version   # 确认可用，例如 0.10.x
 
 ```bash
 # 在 meta 仓根目录 cloudflare_work/ 下执行
-graft init -y cloudflare-docs   # 写入 Cursor/Claude 等 agent 指令 + MCP
-graft build cloudflare-docs     # 扫描源码，生成 cloudflare-docs/graft/
+graft init -y 97_cloudflare-docs   # 写入 Cursor/Claude 等 agent 指令 + MCP
+graft build 97_cloudflare-docs     # 扫描源码，生成 97_cloudflare-docs/graft/
 ```
 
 `init` 会写入（因仓而异）：
@@ -45,7 +45,7 @@ graft build cloudflare-docs     # 扫描源码，生成 cloudflare-docs/graft/
 {
   "version": 1,
   "children": [
-    "cloudflare-docs",
+    "97_cloudflare-docs",
     "orchestrator-worker"
   ]
 }
@@ -54,8 +54,8 @@ graft build cloudflare-docs     # 扫描源码，生成 cloudflare-docs/graft/
 ### 4. 校验
 
 ```bash
-graft check cloudflare-docs   # wiring 是否与代码同步
-graft map cloudflare-docs     # 目录集群 / hubs / hotspots 总览
+graft check 97_cloudflare-docs   # wiring 是否与代码同步
+graft map 97_cloudflare-docs     # 目录集群 / hubs / hotspots 总览
 ```
 
 `check` 提示 `deep layer: not built` 属正常（未跑 `--deep`）。只要 `graph check: OK` 即可日常使用。

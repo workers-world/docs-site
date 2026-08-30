@@ -478,7 +478,7 @@ npx wrangler secret put RULES_ADMIN_TOKEN   # Admin/Dashboard/API（per-Worker�
 
 # 推荐：Secrets Store 共享下列 token（取消 wrangler.toml 中注释并填 store_id）
 # npx wrangler secrets-store store create default --remote
-# npx wrangler secrets-store secret create <STORE_ID> --name NOTIFY_AUTH_TOKEN --scopes workers --remote
+# npx wrangler secrets-store secret create <STORE_ID> --name NOTIFY_AUTH_TOKEN --scopes 95_workers --remote
 # 同理 LLM_GATEWAY_AUTH_TOKEN / COUNTER_AUTH_TOKEN
 # 过渡期仍可用：npx wrangler secret put NOTIFY_AUTH_TOKEN 等
 

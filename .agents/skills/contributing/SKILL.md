@@ -1,6 +1,6 @@
 ---
 name: contributing
-description: Use when writing or editing pages in workers-world/docs (docs-site) — frontmatter, Nimbus components, content types, or PR review.
+description: Use when writing or editing pages in 95_workers-world/docs (docs-site) — frontmatter, Nimbus components, content types, or PR review.
 ---
 
 # Contributing to workers-world docs

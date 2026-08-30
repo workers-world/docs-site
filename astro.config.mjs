@@ -12,16 +12,16 @@ import nimbus, {
 async function autogenSections() {
 	const dirs = await readdir("./src/content/docs/", { withFileTypes: true });
 	const labelMap = {
-		"getting-started": "入门",
-		"architecture": "架构",
-		"workers": "Worker总览",
-		"operations": "CI/CD",
-		"develop-specifications": "开发规范",
-		"develop-logs": "开发日志",
-		"language": "Language",
-		"cloudflare": "Cloudflare",
-		"references": "引用",
-		"ai": "AI",
+		"0_getting-started": "开始入门",
+		"1_architecture": "架构",
+		"2_develop-specifications": "开发规范",
+		"3_ai": "AI",
+		"95_workers": "Workers",
+		"96_operations": "CI/CD",
+		"97_cloudflare": "Cloudflare相关",
+		"98_references": "引用",
+		"99_develop-logs": "开发日志",
+		"992_language": "开发语言",
 	};
 	return dirs
 		.filter((entry) => entry.isDirectory())
@@ -35,12 +35,12 @@ const sidebarItems = await autogenSections();
 
 const nimbusConfig = defineNimbusConfig({
 	site: "https://docs.pages.dev",
-	title: "workers-world",
-	description: "workers-world 组织内部文档",
+	title: "95_workers-world",
+	description: "95_workers-world 组织文档",
 	locale: "zh-CN",
-	github: "https://github.com/workers-world/docs",
+	github: "https://github.com/workers-world/docs-site",
 	editPattern:
-		"https://github.com/workers-world/docs/edit/main/{path}",
+		"https://github.com/workers-world/docs-site/edit/main/{path}",
 	search: { provider: "pagefind" },
 	sidebar: {
 		items: sidebarItems,

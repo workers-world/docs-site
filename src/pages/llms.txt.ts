@@ -7,7 +7,7 @@ export const GET: APIRoute = async ({ site }) => {
 	const docs = await getCollection("docs");
 	const base = site?.href?.replace(/\/$/, "") ?? "";
 	const lines = [
-		"# workers-world docs",
+		"# 95_workers-world docs",
 		"",
 		"> 组织内部文档站。权威开发副本：cloudflare_work/docs/",
 		"",
