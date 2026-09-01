@@ -29,6 +29,7 @@ migrate() {
     # 去掉原文件第一个 # 标题行（Starlight 用 frontmatter title）
     awk 'BEGIN{skip=0} /^# / && skip==0 {skip=1; next} {print}' "$src"
   } > "$dest"
+  python3 "$(dirname "$0")/rewrite-migrated-links.py" "$dest"
   echo "OK $dest"
 }
 

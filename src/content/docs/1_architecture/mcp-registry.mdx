@@ -11,7 +11,7 @@ title: MCP Registry 对接
 | 组件                                 | 职责                                                                                                      |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------------- |
 | **mcp-registry-worker**              | Agent 可调 API 的 OpenAPI 注册中心：MCP `search` / `execute`                                              |
-| **deploy-tracker `worker_registry`** | 部署元数据（版本、env 指纹、谁部署）— 见 [requirement/worker-registry.md](requirement/worker-registry.md) |
+| **deploy-tracker `worker_registry`** | 部署元数据（版本、env 指纹、谁部署）— 见 `cloudflare_work/docs/requirement/worker-registry.md` |
 
 两者 **不合并**。`worker_name` 可交叉引用，表结构与写入路径独立。
 
@@ -54,10 +54,10 @@ flowchart LR
 
 新增可发现服务时，在 **mcp-registry-worker** 仓（当前静态表模式）完成：
 
-- [ ] [`src/registry.ts`](../mcp-registry-worker/src/registry.ts) `REGISTRY` 追加条目
+- [ ] `mcp-registry-worker/src/registry.ts` `REGISTRY` 追加条目
 - [ ] `wrangler.toml`：`[[services]]`（`SVC_*`）+ `[[secrets_store_secrets]]`
-- [ ] [`src/env.ts`](../mcp-registry-worker/src/env.ts) 类型追加
-- [ ] [`framework_sdk_worker/src/mcp/fallback-spec.ts`](../framework_sdk_worker/src/mcp/fallback-spec.ts) 追加对应 paths（上游全失败时的静态兜底）
+- [ ] `mcp-registry-worker/src/env.ts` 类型追加
+- [ ] `framework_sdk_worker/src/mcp/fallback-spec.ts` 追加对应 paths（上游全失败时的静态兜底）
 - [ ] `test/openapi-merge.test.ts`：`matchService` 覆盖新前缀
 
 ### RegistryEntry 字段
@@ -67,21 +67,21 @@ flowchart LR
 | `worker`              | CF Worker 名                                                                                                                |
 | `svcKey`              | `env` 中 Service Binding 名，如 `SVC_DESK`                                                                                  |
 | `tokenKey`            | `env` 中 token binding 名                                                                                                   |
-| `baseUrl`             | Service Binding 虚拟 host，如 `https://desk`（与 [edge-gateway-routes.json](edge-gateway-routes.json) 的 `fetchHost` 对齐） |
+| `baseUrl`             | Service Binding 虚拟 host，如 `https://desk`（与 `cloudflare_work/docs/edge-gateway-routes.json` 的 `fetchHost` 对齐） |
 | `tag` / `description` | OpenAPI 展示，帮助 LLM 选型                                                                                                 |
 | `matchPrefixes`       | execute 路由白名单前缀（靠前优先；勿与既有前缀冲突）                                                                        |
 | `timeoutMs`           | 可选；LLM 类长调用放宽                                                                                                      |
 
 ## 5. 命名与 Secrets
 
-- Binding / Token 公式见 [spec-name/标准命名规则需求.md](spec-name/标准命名规则需求.md) §4
-- 对照表（无密钥）：[secrets-inventory.md](secrets-inventory.md)
+- Binding / Token 公式见 `cloudflare_work/docs/spec-name/标准命名规则需求.md` §4
+- 对照表（无密钥）：`cloudflare_work/docs/secrets-inventory.md`
 - mcp-registry 侧 `tokenKey` 可与下游本地 binding 名不同，但 `secret_name` 必须指向 **同值** Store secret
 - Admin 类多数映射 Store `RULES_ADMIN_TOKEN`；金价/基金 sync 类用独立 Store secret（与下游 `SYNC_BEARER_TOKEN` 同值）
 
 ## 6. 与 edge-gateway
 
-公网 API：先改 [edge-gateway-routes.json](edge-gateway-routes.json)，再登记 mcp-registry。  
+公网 API：先改 `cloudflare_work/docs/edge-gateway-routes.json`，再登记 mcp-registry。  
 `baseUrl` 的 host 段 = gateway `fetchHost`（例：`fetchHost: "desk"` → `https://desk`）。  
 仅 Service Binding 可达、不上 gateway 的 Worker（如 analysis-engine）仍可登记。
 
