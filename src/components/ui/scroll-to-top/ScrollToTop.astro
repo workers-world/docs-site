@@ -1,6 +1,6 @@
 ---
 // Scroll-to-top button; ring uses pathLength="1" so offset = 1 - progress.
-import Icon from "@cloudflare/nimbus-docs/components/Icon.astro";
+import Icon from '@cloudflare/nimbus-docs/components/Icon.astro';
 ---
 
 <button
@@ -15,15 +15,9 @@ import Icon from "@cloudflare/nimbus-docs/components/Icon.astro";
 		fill="none"
 		aria-hidden="true"
 	>
-		<circle class="nb-scroll-track" cx="22" cy="22" r="20" stroke-width="2"
+		<circle class="nb-scroll-track" cx="22" cy="22" r="20" stroke-width="2"></circle>
+		<circle class="nb-scroll-progress" cx="22" cy="22" r="20" stroke-width="2" pathLength="1"
 		></circle>
-		<circle
-			class="nb-scroll-progress"
-			cx="22"
-			cy="22"
-			r="20"
-			stroke-width="2"
-			pathLength="1"></circle>
 	</svg>
 	<Icon name="ph:arrow-up-bold" class="relative size-4" />
 </button>

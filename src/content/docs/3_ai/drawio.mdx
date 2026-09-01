@@ -10,10 +10,10 @@ description: 在 Cursor 中通过官方 @drawio/mcp 本地 MCP 服务画图，�
 
 ## 方案对比
 
-| 方案 | 图数据是否离开本机 | 安装 | 适用 |
-|------|-------------------|------|------|
-| **MCP Tool Server**（`@drawio/mcp`，推荐） | 否 — 内容在浏览器 URL `#fragment`，不随 HTTP 请求上传 | `npm install -g` | 本地开发、隐私敏感 |
-| **MCP App Server**（`https://mcp.draw.io/mcp`） | **是** — 请求发往 draw.io 云端 | 一键 URL | 需要聊天内嵌预览、可接受上云 |
+| 方案                                            | 图数据是否离开本机                                    | 安装             | 适用                         |
+| ----------------------------------------------- | ----------------------------------------------------- | ---------------- | ---------------------------- |
+| **MCP Tool Server**（`@drawio/mcp`，推荐）      | 否 — 内容在浏览器 URL `#fragment`，不随 HTTP 请求上传 | `npm install -g` | 本地开发、隐私敏感           |
+| **MCP App Server**（`https://mcp.draw.io/mcp`） | **是** — 请求发往 draw.io 云端                        | 一键 URL         | 需要聊天内嵌预览、可接受上云 |
 
 下文仅描述 **Tool Server 本地安装**。
 
@@ -46,14 +46,14 @@ which drawio-mcp
 
 ```json
 {
-  "mcpServers": {
-    "drawio": {
-      "command": "/opt/homebrew/bin/drawio-mcp",
-      "env": {
-        "DRAWIO_ICON_SERVICE_URL": "off"
-      }
-    }
-  }
+	"mcpServers": {
+		"drawio": {
+			"command": "/opt/homebrew/bin/drawio-mcp",
+			"env": {
+				"DRAWIO_ICON_SERVICE_URL": "off"
+			}
+		}
+	}
 }
 ```
 
@@ -88,15 +88,15 @@ curl -fsSL -o "$(npm root -g)/@drawio/mcp/src/search-index.json" \
 
 ## 可用工具
 
-| 工具 | 用途 |
-|------|------|
-| `open_drawio_xml` | 用 draw.io XML 在编辑器中打开图 |
-| `open_drawio_mermaid` | 用 Mermaid 语法生成并打开图 |
-| `open_drawio_csv` | 用 CSV 生成组织图、流程图等 |
-| `search_shapes` | 搜索 AWS / Azure / GCP / Kubernetes 等内置图形库 |
-| `list_pages` | 列出本地 `.drawio` 文件中的页 |
-| `get_page` | 读取某一页的 `mxGraphModel` XML |
-| `set_page` | 替换本地 `.drawio` 文件中某一页内容 |
+| 工具                  | 用途                                             |
+| --------------------- | ------------------------------------------------ |
+| `open_drawio_xml`     | 用 draw.io XML 在编辑器中打开图                  |
+| `open_drawio_mermaid` | 用 Mermaid 语法生成并打开图                      |
+| `open_drawio_csv`     | 用 CSV 生成组织图、流程图等                      |
+| `search_shapes`       | 搜索 AWS / Azure / GCP / Kubernetes 等内置图形库 |
+| `list_pages`          | 列出本地 `.drawio` 文件中的页                    |
+| `get_page`            | 读取某一页的 `mxGraphModel` XML                  |
+| `set_page`            | 替换本地 `.drawio` 文件中某一页内容              |
 
 ## 数据与网络行为
 
@@ -107,12 +107,12 @@ curl -fsSL -o "$(npm root -g)/@drawio/mcp/src/search-index.json" \
 
 **仍可能产生的外网请求（按需知晓）：**
 
-| 场景 | 目标 | 内容 |
-|------|------|------|
-| 打开编辑器（默认） | `app.diagrams.net` | 仅加载 draw.io **前端代码**，图数据在本地 fragment |
-| `search_shapes`（未缓存索引） | `cdn.jsdelivr.net` | 图形索引 JSON |
-| `search_shapes`（未设 `off`） | `icons.diagrams.net` | 品牌 / 概念图标 |
-| `routing: "libavoid"` 首次 | `viewer.diagrams.net` | 边路由脚本 |
+| 场景                          | 目标                  | 内容                                               |
+| ----------------------------- | --------------------- | -------------------------------------------------- |
+| 打开编辑器（默认）            | `app.diagrams.net`    | 仅加载 draw.io **前端代码**，图数据在本地 fragment |
+| `search_shapes`（未缓存索引） | `cdn.jsdelivr.net`    | 图形索引 JSON                                      |
+| `search_shapes`（未设 `off`） | `icons.diagrams.net`  | 品牌 / 概念图标                                    |
+| `routing: "libavoid"` 首次    | `viewer.diagrams.net` | 边路由脚本                                         |
 
 若要进一步减少外网依赖，可自建 draw.io 实例并在 `env` 中设置：
 
@@ -140,13 +140,13 @@ curl -fsSL -o "$(npm root -g)/@drawio/mcp/src/search-index.json" \
 
 ## 故障排查
 
-| 现象 | 处理 |
-|------|------|
+| 现象                    | 处理                                                                      |
+| ----------------------- | ------------------------------------------------------------------------- |
 | MCP 显示 error / 未连接 | 检查 `drawio-mcp` 路径、`node -v`；在终端手动运行 `drawio-mcp` 看是否报错 |
-| `search_shapes` 超时 | 执行上文「缓存图形索引」步骤 |
-| 图在浏览器打不开 | 确认系统默认浏览器可用；macOS 上依赖 `open` 命令 |
-| npm 装包失败 | 指定 `--registry https://registry.npmjs.org`（避免镜像源缺包） |
-| 需要完全离线 | `DRAWIO_ICON_SERVICE_URL=off` + 本地索引 + 自托管 `DRAWIO_BASE_URL` |
+| `search_shapes` 超时    | 执行上文「缓存图形索引」步骤                                              |
+| 图在浏览器打不开        | 确认系统默认浏览器可用；macOS 上依赖 `open` 命令                          |
+| npm 装包失败            | 指定 `--registry https://registry.npmjs.org`（避免镜像源缺包）            |
+| 需要完全离线            | `DRAWIO_ICON_SERVICE_URL=off` + 本地索引 + 自托管 `DRAWIO_BASE_URL`       |
 
 ## 相关资源
 

@@ -109,21 +109,14 @@
 		font-weight: var(--nb-h4-weight);
 	}
 
-	.docs-content
-		:where(h1:not([class]), h2:not([class]), h3:not([class]), h4:not([class])) {
+	.docs-content :where(h1:not([class]), h2:not([class]), h3:not([class]), h4:not([class])) {
 		/* Below xl the sticky mobile TOC sits under the sticky header, so headings
      need extra clearance when jumped to. At xl+ only the header is sticky. */
 		scroll-margin-top: 7.5rem;
 	}
 
 	@media (min-width: 80rem) {
-		.docs-content
-			:where(
-				h1:not([class]),
-				h2:not([class]),
-				h3:not([class]),
-				h4:not([class])
-			) {
+		.docs-content :where(h1:not([class]), h2:not([class]), h3:not([class]), h4:not([class])) {
 			scroll-margin-top: 5rem;
 		}
 	}
@@ -239,21 +232,15 @@
 		white-space: nowrap;
 	}
 
-	.docs-content
-		:where(
-			tbody:not([class]):has(tr:nth-child(5)) tr:nth-child(even) td:not([class])
-		) {
+	.docs-content :where(tbody:not([class]):has(tr:nth-child(5)) tr:nth-child(even) td:not([class])) {
 		background: var(--nb-accent);
 	}
 
-	.docs-content
-		:where(tbody:not([class]) tr:not([class]):last-child td:not([class])) {
+	.docs-content :where(tbody:not([class]) tr:not([class]):last-child td:not([class])) {
 		border-bottom: none;
 	}
 
-	.docs-content
-		:where(td:not([class]), th:not([class]))
-		:where(code:not([class])) {
+	.docs-content :where(td:not([class]), th:not([class])) :where(code:not([class])) {
 		overflow-wrap: normal;
 	}
 

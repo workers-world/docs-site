@@ -1,5 +1,5 @@
 ---
-import DocsLayout from "../layouts/DocsLayout.astro";
+import DocsLayout from '../layouts/DocsLayout.astro';
 import {
 	getDocsStaticPaths,
 	getDocsPageProps,
@@ -9,35 +9,31 @@ import {
 	getLastUpdated,
 	getTOC,
 	getBreadcrumbs,
-} from "@cloudflare/nimbus-docs";
-import { config } from "virtual:nimbus/config";
-import { components } from "../mdx-components";
-import type { GetStaticPaths } from "astro";
+} from '@cloudflare/nimbus-docs';
+import { config } from 'virtual:nimbus/config';
+import { components } from '../mdx-components';
+import type { GetStaticPaths } from 'astro';
 
 export const prerender = true;
 export const getStaticPaths = (async (...args: Parameters<typeof getDocsStaticPaths>) => {
 	const paths = await getDocsStaticPaths(...args);
-	return paths.filter((p) => p.params.slug !== "index");
+	return paths.filter((p) => p.params.slug !== 'index');
 }) satisfies GetStaticPaths;
 
 const { entry, Content, headings } = await getDocsPageProps(Astro);
 
-const currentSlug = Astro.url.pathname.replace(/\/$/, "") || "/";
-const isSplash = entry.data.template === "splash";
-const isCustom = entry.data.mode === "custom";
+const currentSlug = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isSplash = entry.data.template === 'splash';
+const isCustom = entry.data.mode === 'custom';
 const isStandalone = isCustom || isSplash;
 const sidebarOn =
-	!isStandalone &&
-	config.features?.sidebar !== false &&
-	entry.data.sidebar !== false;
+	!isStandalone && config.features?.sidebar !== false && entry.data.sidebar !== false;
 const tocOn =
 	!isStandalone &&
 	config.features?.tableOfContents !== false &&
 	entry.data.tableOfContents !== false;
 
-const sidebar = sidebarOn
-	? await getSidebar(currentSlug, { collection: entry.collection })
-	: false;
+const sidebar = sidebarOn ? await getSidebar(currentSlug, { collection: entry.collection }) : false;
 
 const prevNext = isSplash
 	? {}
@@ -52,12 +48,9 @@ const breadcrumbs = isSplash
 
 const editUrl = await getEditUrl(entry);
 const lastUpdated = entry.data.lastUpdated ?? (await getLastUpdated(entry));
-const toc =
-	tocOn && entry.data.tableOfContents !== false ? getTOC(headings) : false;
+const toc = tocOn && entry.data.tableOfContents !== false ? getTOC(headings) : false;
 const markdownPath = `/${entry.id}/index.md`;
-const markdownUrl = Astro.site
-	? new URL(markdownPath, Astro.site).href
-	: markdownPath;
+const markdownUrl = Astro.site ? new URL(markdownPath, Astro.site).href : markdownPath;
 ---
 
 <DocsLayout

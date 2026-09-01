@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Wire Tailwind v4 dark: to [data-mode="dark"] */
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
@@ -100,11 +100,10 @@
 
 	/* Typography — self-hosted via @fontsource-variable in BaseLayout.astro */
 	--nb-font-sans:
-		"Inter Variable", "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
-		sans-serif;
+		'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 	--nb-font-mono:
-		"JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "Cascadia Code",
-		"Source Code Pro", Menlo, Consolas, monospace;
+		'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'Cascadia Code', 'Source Code Pro',
+		Menlo, Consolas, monospace;
 	--nb-h1-size: 2.1875rem;
 	--nb-h1-weight: 600;
 	--nb-h1-tracking: -0.025em;
@@ -130,7 +129,7 @@
 }
 
 /* ---- Dark mode ---- */
-[data-mode="dark"] {
+[data-mode='dark'] {
 	color-scheme: dark;
 
 	--nb-background: oklch(0.192 0 0);
@@ -254,8 +253,7 @@
 	--shadow-lg: var(--nb-shadow-lg);
 
 	/* Landing-page animations */
-	--animate-changelog-pulse: changelog-pulse 3s cubic-bezier(0.16, 1, 0.3, 1)
-		infinite;
+	--animate-changelog-pulse: changelog-pulse 3s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 
 	@keyframes changelog-pulse {
 		0% {
@@ -299,7 +297,7 @@
 pre.astro-code span {
 	color: var(--shiki-light, inherit);
 }
-[data-mode="dark"] pre.astro-code span {
+[data-mode='dark'] pre.astro-code span {
 	color: var(--shiki-dark, inherit);
 }
 
@@ -342,7 +340,7 @@ pre.astro-code span {
 	width: 0.875rem;
 	height: 0.875rem;
 }
-.nb-code-copy[data-state="copied"] {
+.nb-code-copy[data-state='copied'] {
 	color: var(--nb-success);
 }
 
@@ -411,10 +409,10 @@ pre.astro-code span {
 .nb-code-figure:hover::before {
 	opacity: 0;
 }
-.nb-code-figure[data-nb-lang="text"]::before,
-.nb-code-figure[data-nb-lang="plaintext"]::before,
-.nb-code-figure[data-nb-lang="plain"]::before,
-.nb-code-figure[data-nb-lang="txt"]::before {
+.nb-code-figure[data-nb-lang='text']::before,
+.nb-code-figure[data-nb-lang='plaintext']::before,
+.nb-code-figure[data-nb-lang='plain']::before,
+.nb-code-figure[data-nb-lang='txt']::before {
 	display: none;
 }
 pre.astro-code code {
@@ -467,11 +465,11 @@ pre.astro-code .line.diff.remove::before {
 	font-weight: 600;
 }
 pre.astro-code .line.diff.add::before {
-	content: "+";
+	content: '+';
 	color: var(--nb-success);
 }
 pre.astro-code .line.diff.remove::before {
-	content: "−";
+	content: '−';
 	color: var(--nb-danger);
 }
 pre.astro-code.has-focused .line:not(.focused) {
@@ -509,11 +507,11 @@ pre.astro-code[data-nb-wrap] .line {
 	overflow-wrap: anywhere;
 	word-break: break-word;
 }
-.nb-code-figure[data-nb-frame="terminal"] {
+.nb-code-figure[data-nb-frame='terminal'] {
 	padding-top: 1.5rem;
 }
-.nb-code-figure[data-nb-frame="terminal"]::after {
-	content: "";
+.nb-code-figure[data-nb-frame='terminal']::after {
+	content: '';
 	position: absolute;
 	top: 0.625rem;
 	left: 0.75rem;
@@ -574,15 +572,41 @@ body:not(:has([data-mobile-sidebar])) [data-menu-btn] {
 		transition: opacity 300ms;
 	}
 }
-.docs-content img[role="button"] {
+.docs-content img[role='button'] {
 	cursor: zoom-in;
 }
 
 /* Site chrome fallbacks for minimal BaseLayout */
-body { margin: 0; font-family: var(--nb-font-sans); background: var(--nb-background); color: var(--nb-foreground); line-height: 1.6; }
-a { color: var(--nb-link); }
-.prose img { max-width: 100%; height: auto; }
-.prose table { border-collapse: collapse; width: 100%; }
-.prose th, .prose td { border: 1px solid var(--nb-border); padding: 0.4rem 0.6rem; }
-pre:not(.astro-code) { background: var(--nb-muted); padding: 0.85rem 1rem; overflow-x: auto; border-radius: 0.4rem; }
-code { font-family: var(--nb-font-mono); font-size: 0.92em; }
+body {
+	margin: 0;
+	font-family: var(--nb-font-sans);
+	background: var(--nb-background);
+	color: var(--nb-foreground);
+	line-height: 1.6;
+}
+a {
+	color: var(--nb-link);
+}
+.prose img {
+	max-width: 100%;
+	height: auto;
+}
+.prose table {
+	border-collapse: collapse;
+	width: 100%;
+}
+.prose th,
+.prose td {
+	border: 1px solid var(--nb-border);
+	padding: 0.4rem 0.6rem;
+}
+pre:not(.astro-code) {
+	background: var(--nb-muted);
+	padding: 0.85rem 1rem;
+	overflow-x: auto;
+	border-radius: 0.4rem;
+}
+code {
+	font-family: var(--nb-font-mono);
+	font-size: 0.92em;
+}

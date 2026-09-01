@@ -2,27 +2,27 @@
 /**
  * DocsLayout — official Nimbus three-column docs shell.
  */
-import Icon from "@cloudflare/nimbus-docs/components/Icon.astro";
-import BaseLayout from "./BaseLayout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
-import { Banner } from "@/components/ui/banner";
+import Icon from '@cloudflare/nimbus-docs/components/Icon.astro';
+import BaseLayout from './BaseLayout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import { Banner } from '@/components/ui/banner';
 import {
 	Sidebar,
 	SidebarFilter,
 	SidebarProductNav,
 	SidebarStateRestore,
-} from "@/components/ui/sidebar";
-import { TOC, MobileTOC } from "@/components/ui/toc";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Pagination } from "@/components/ui/pagination";
-import { PageActions, PageActionLinks } from "@/components/ui/page-actions";
-import { Badge } from "@/components/ui/badge";
-import { ScrollToTop } from "@/components/ui/scroll-to-top";
-import type { DocsPageProps } from "@cloudflare/nimbus-docs/types";
-import { marked } from "marked";
-import { getSectionTitle } from "@cloudflare/nimbus-docs";
-import { sectionTitleResolver } from "@/util/sidebar";
+} from '@/components/ui/sidebar';
+import { TOC, MobileTOC } from '@/components/ui/toc';
+import { Breadcrumbs } from '@/components/ui/breadcrumbs';
+import { Pagination } from '@/components/ui/pagination';
+import { PageActions, PageActionLinks } from '@/components/ui/page-actions';
+import { Badge } from '@/components/ui/badge';
+import { ScrollToTop } from '@/components/ui/scroll-to-top';
+import type { DocsPageProps } from '@cloudflare/nimbus-docs/types';
+import { marked } from 'marked';
+import { getSectionTitle } from '@cloudflare/nimbus-docs';
+import { sectionTitleResolver } from '@/util/sidebar';
 
 type Props = DocsPageProps & {
 	wide?: boolean;
@@ -38,7 +38,7 @@ const {
 	headings,
 	breadcrumbs,
 	prevNext,
-	mode = "doc",
+	mode = 'doc',
 	banner,
 	head = [],
 	noindex,
@@ -53,13 +53,10 @@ const {
 	hideTitle = false,
 } = Astro.props;
 
-const isCustom = mode === "custom";
+const isCustom = mode === 'custom';
 const showSidebar = sidebar !== false;
-const productSlug = Astro.url.pathname.split("/").filter(Boolean)[0] ?? null;
-const sectionTitle = await getSectionTitle(
-	Astro.url.pathname,
-	sectionTitleResolver,
-);
+const productSlug = Astro.url.pathname.split('/').filter(Boolean)[0] ?? null;
+const sectionTitle = await getSectionTitle(Astro.url.pathname, sectionTitleResolver);
 const breadcrumbItems = (breadcrumbs ?? []).map((c, i) =>
 	i === 1 && !c.href && productSlug ? { ...c, href: `/${productSlug}/` } : c,
 );
@@ -70,13 +67,13 @@ const product = productSlug
 		}
 	: null;
 
-const hasHeader = Astro.slots.has("header");
-const hasSidebar = Astro.slots.has("sidebar");
-const hasToc = Astro.slots.has("toc");
-const hasPageTitle = Astro.slots.has("page-title");
-const hasContentFooter = Astro.slots.has("content-footer");
+const hasHeader = Astro.slots.has('header');
+const hasSidebar = Astro.slots.has('sidebar');
+const hasToc = Astro.slots.has('toc');
+const hasPageTitle = Astro.slots.has('page-title');
+const hasContentFooter = Astro.slots.has('content-footer');
 const showActions = true;
-const hasPagination = Astro.slots.has("pagination");
+const hasPagination = Astro.slots.has('pagination');
 const hasTocAside = headings !== false;
 ---
 
@@ -97,11 +94,7 @@ const hasTocAside = headings !== false;
 			hasHeader ? (
 				<slot name="header" />
 			) : (
-				<Header
-					collection={collection}
-					entryId={entryId}
-					showSidebar={showSidebar}
-				/>
+				<Header collection={collection} entryId={entryId} showSidebar={showSidebar} />
 			)
 		}
 
@@ -124,19 +117,13 @@ const hasTocAside = headings !== false;
 							>
 								{hasSidebar ? (
 									<div data-sidebar-home class="flex-1">
-										<div
-											data-shared-sidebar-nav
-											class="flex-1 pb-12 max-lg:pb-8"
-										>
+										<div data-shared-sidebar-nav class="flex-1 pb-12 max-lg:pb-8">
 											<slot name="sidebar" />
 										</div>
 									</div>
 								) : (
 									<div data-sidebar-home class="flex-1">
-										<nav
-											data-shared-sidebar-nav
-											class="flex-1 pb-12 max-lg:pb-8"
-										>
+										<nav data-shared-sidebar-nav class="flex-1 pb-12 max-lg:pb-8">
 											<div class="bg-background z-10 px-4 pb-3 lg:sticky lg:top-0">
 												{product && (
 													<SidebarProductNav
@@ -163,7 +150,7 @@ const hasTocAside = headings !== false;
 							<div class="flex min-w-0 flex-1">
 								<main id="main-content" class="min-w-0 flex-1">
 									<div
-										class={`mx-auto px-4 pt-6 pb-12 lg:px-6 ${wide ? "max-w-[1400px]" : "max-w-(--nb-content-max)"}`}
+										class={`mx-auto px-4 pt-6 pb-12 lg:px-6 ${wide ? 'max-w-[1400px]' : 'max-w-(--nb-content-max)'}`}
 									>
 										{banner && (
 											<Banner
@@ -185,13 +172,7 @@ const hasTocAside = headings !== false;
 														>
 															{title}
 														</h1>
-														{draft && (
-															<Badge
-																text="Draft"
-																variant="warning"
-																size="medium"
-															/>
-														)}
+														{draft && <Badge text="Draft" variant="warning" size="medium" />}
 													</div>
 													{summary && (
 														<div
@@ -230,12 +211,7 @@ const hasTocAside = headings !== false;
 											<Pagination prevNext={prevNext} />
 										)}
 										{showActions && (
-											<div
-												class:list={[
-													"mt-10 flex flex-col gap-5",
-													hasTocAside && "xl:hidden",
-												]}
-											>
+											<div class:list={['mt-10 flex flex-col gap-5', hasTocAside && 'xl:hidden']}>
 												<PageActionLinks editUrl={editUrl} />
 											</div>
 										)}
@@ -248,11 +224,7 @@ const hasTocAside = headings !== false;
 										class="sticky top-14 hidden max-h-[calc(100vh-3.5rem)] w-(--nb-toc-width) shrink-0 overflow-y-auto xl:block"
 									>
 										<div class="pt-6 pr-6 pb-8 pl-8">
-											{hasToc ? (
-												<slot name="toc" />
-											) : (
-												<TOC headings={headings} />
-											)}
+											{hasToc ? <slot name="toc" /> : <TOC headings={headings} />}
 											{showActions && (
 												<div class="border-border mt-8 flex flex-col gap-5 border-t pt-6">
 													<PageActionLinks editUrl={editUrl} />

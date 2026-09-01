@@ -14,32 +14,32 @@
 <script is:inline>
 	(function () {
 		try {
-			if (!matchMedia("(min-width: 64rem)").matches) return;
-			const sidebar = document.getElementById("desktop-sidebar");
+			if (!matchMedia('(min-width: 64rem)').matches) return;
+			const sidebar = document.getElementById('desktop-sidebar');
 			if (!sidebar) return;
-			const content = sidebar.querySelector("[data-nb-sidebar]");
+			const content = sidebar.querySelector('[data-nb-sidebar]');
 			if (!content) return;
 
 			function setGroupOpen(group, open) {
-				group.setAttribute("data-nb-default-open", open ? "true" : "false");
-				const trigger = group.querySelector("[data-nb-collapsible-trigger]");
-				const panel = group.querySelector("[data-nb-collapsible-content]");
-				const state = open ? "open" : "closed";
+				group.setAttribute('data-nb-default-open', open ? 'true' : 'false');
+				const trigger = group.querySelector('[data-nb-collapsible-trigger]');
+				const panel = group.querySelector('[data-nb-collapsible-content]');
+				const state = open ? 'open' : 'closed';
 				if (trigger) {
-					trigger.setAttribute("data-nb-state", state);
-					trigger.setAttribute("aria-expanded", String(open));
+					trigger.setAttribute('data-nb-state', state);
+					trigger.setAttribute('aria-expanded', String(open));
 				}
-				if (panel) panel.setAttribute("data-nb-state", state);
+				if (panel) panel.setAttribute('data-nb-state', state);
 			}
 
-			const raw = sessionStorage.getItem("sidebar-state");
+			const raw = sessionStorage.getItem('sidebar-state');
 			let state;
 			if (raw) {
 				state = JSON.parse(raw);
 				if (state && content.dataset.nbSidebarHash === state.hash) {
-					const groups = content.querySelectorAll("[data-nb-sidebar-group]");
+					const groups = content.querySelectorAll('[data-nb-sidebar-group]');
 					for (let i = 0; i < groups.length; i++) {
-						if (typeof state.open[i] === "boolean") {
+						if (typeof state.open[i] === 'boolean') {
 							setGroupOpen(groups[i], state.open[i]);
 						}
 					}
@@ -49,12 +49,10 @@
 			// Active page's group must always be open, regardless of stored state
 			const active = sidebar.querySelector("[aria-current='page']");
 			if (active) {
-				let d = active.closest("[data-nb-sidebar-group]");
+				let d = active.closest('[data-nb-sidebar-group]');
 				while (d) {
 					setGroupOpen(d, true);
-					d =
-						d.parentElement &&
-						d.parentElement.closest("[data-nb-sidebar-group]");
+					d = d.parentElement && d.parentElement.closest('[data-nb-sidebar-group]');
 				}
 			}
 

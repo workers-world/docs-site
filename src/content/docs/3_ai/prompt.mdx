@@ -5,12 +5,11 @@ description: 面向 AI 助手的可复用提示词（Observability 慢 span 分�
 
 本文收录在本仓运维/排障中**会反复使用**的提示词。复制到 Cursor（或附上导出的 JSON）即可，Agent 应结合 `graft ask` 对照代码落点。
 
-
 ## 问句
 
-| 中文 | 英文 |
-| --- | --- |
-|定位下原因 | Pinpoint the cause. |
+| 中文       | 英文                |
+| ---------- | ------------------- |
+| 定位下原因 | Pinpoint the cause. |
 
 ## Cloudflare Observability：慢 span / 高 durationMS 分析
 
@@ -62,26 +61,26 @@ description: 面向 AI 助手的可复用提示词（Observability 慢 span 分�
 
 ### 导出与提问技巧
 
-| 步骤 | 说明 |
-|------|------|
-| 过滤 | Logs / Traces 用 `durationMS > 3000` 等；注意筛的是**单 span**，不是整 trace 所有子 span |
-| 导出 | 导出 JSON；大文件可只保留慢 trace 或单个 `traceId` 相关条目 |
-| 附加上下文 | 写明筛选条件、是否已 deploy 某修复、怀疑的代码路径 |
-| 对照 trace | 用 `invocation.sequence` 排序；queue 父 span 的 duration 常包含子 span 累计 wall time |
+| 步骤       | 说明                                                                                     |
+| ---------- | ---------------------------------------------------------------------------------------- |
+| 过滤       | Logs / Traces 用 `durationMS > 3000` 等；注意筛的是**单 span**，不是整 trace 所有子 span |
+| 导出       | 导出 JSON；大文件可只保留慢 trace 或单个 `traceId` 相关条目                              |
+| 附加上下文 | 写明筛选条件、是否已 deploy 某修复、怀疑的代码路径                                       |
+| 对照 trace | 用 `invocation.sequence` 排序；queue 父 span 的 duration 常包含子 span 累计 wall time    |
 
 ### 本仓已知「慢但常正常」速查
 
-| Worker / 队列 / Cron | span | 典型耗时 | 原因 |
-|----------------------|------|----------|------|
-| llm-gateway-worker | `POST` `/v1/chat/invest` / `general` | 3–11s | LLM 推理 |
-| email-rule-worker | `email-rule-llm-pending` queue | 10–28s（batch≈2） | 每条 LLM pending 串行调 gateway |
-| invest-rss-worker | `invest-llm-pending` queue | 10–37s | 同上 |
-| invest-rss-worker | `email` | 3–24s | 入站邮件处理（拉正文等） |
-| advisor-worker | `advisor-ingest` queue | 20–43s（batch≈5） | ingest + LLM 链 |
-| orchestrator-worker | `quality-incidents` queue | **~90–115s**（batch≈10） | 每条 incident 触发 Capture 前 `sleep(12s)` 限速 |
-| deploy-tracker-worker | `scheduled` `*/20` | **~60–66s** | 多 repo GitHub API（GHA stats + reconcile） |
-| gold-price-worker | `scheduled` / `fetch` | 5–7s | 定时拉外部金价 |
-| notify-worker | `notify-outbound` queue | 4–8s（batch 15–25） | digest 窗口整点批次；**串行 confirmSent 可优化**（已改并行 confirmSent，需 deploy 后验证） |
+| Worker / 队列 / Cron  | span                                 | 典型耗时                 | 原因                                                                                       |
+| --------------------- | ------------------------------------ | ------------------------ | ------------------------------------------------------------------------------------------ |
+| llm-gateway-worker    | `POST` `/v1/chat/invest` / `general` | 3–11s                    | LLM 推理                                                                                   |
+| email-rule-worker     | `email-rule-llm-pending` queue       | 10–28s（batch≈2）        | 每条 LLM pending 串行调 gateway                                                            |
+| invest-rss-worker     | `invest-llm-pending` queue           | 10–37s                   | 同上                                                                                       |
+| invest-rss-worker     | `email`                              | 3–24s                    | 入站邮件处理（拉正文等）                                                                   |
+| advisor-worker        | `advisor-ingest` queue               | 20–43s（batch≈5）        | ingest + LLM 链                                                                            |
+| orchestrator-worker   | `quality-incidents` queue            | **~90–115s**（batch≈10） | 每条 incident 触发 Capture 前 `sleep(12s)` 限速                                            |
+| deploy-tracker-worker | `scheduled` `*/20`                   | **~60–66s**              | 多 repo GitHub API（GHA stats + reconcile）                                                |
+| gold-price-worker     | `scheduled` / `fetch`                | 5–7s                     | 定时拉外部金价                                                                             |
+| notify-worker         | `notify-outbound` queue              | 4–8s（batch 15–25）      | digest 窗口整点批次；**串行 confirmSent 可优化**（已改并行 confirmSent，需 deploy 后验证） |
 
 ### notify digest 专项（常对照 trace）
 

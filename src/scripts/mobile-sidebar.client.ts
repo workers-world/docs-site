@@ -1,14 +1,12 @@
-import { lockScroll, unlockScroll } from "@cloudflare/nimbus-docs/client";
+import { lockScroll, unlockScroll } from '@cloudflare/nimbus-docs/client';
 
 const CLOSE_DURATION_MS = 250;
 
 let cleanupCurrent: (() => void) | undefined;
 
 function initMobileSidebar(): () => void {
-	const dialogOrNull = document.querySelector<HTMLDialogElement>(
-		"[data-mobile-sidebar]",
-	);
-	const menuBtnOrNull = document.querySelector<HTMLElement>("[data-menu-btn]");
+	const dialogOrNull = document.querySelector<HTMLDialogElement>('[data-mobile-sidebar]');
+	const menuBtnOrNull = document.querySelector<HTMLElement>('[data-menu-btn]');
 	if (!dialogOrNull || !menuBtnOrNull) return () => {};
 	// Re-bind as non-nullable so the nested `function` declarations below
 	// (hoisted, so TS can't narrow the outer guard into their bodies) see a
@@ -16,16 +14,11 @@ function initMobileSidebar(): () => void {
 	const dialog = dialogOrNull;
 	const menuBtn = menuBtnOrNull;
 
-	const sidebarHome = document.querySelector<HTMLElement>(
-		"[data-sidebar-home]",
-	);
-	const mobileSidebarSlot = dialog.querySelector<HTMLElement>(
-		"[data-mobile-sidebar-slot]",
-	);
+	const sidebarHome = document.querySelector<HTMLElement>('[data-sidebar-home]');
+	const mobileSidebarSlot = dialog.querySelector<HTMLElement>('[data-mobile-sidebar-slot]');
 	const sharedSidebarNav =
-		sidebarHome?.querySelector<HTMLElement>("[data-shared-sidebar-nav]") ??
-		null;
-	const desktopMq = window.matchMedia("(min-width: 1024px)");
+		sidebarHome?.querySelector<HTMLElement>('[data-shared-sidebar-nav]') ?? null;
+	const desktopMq = window.matchMedia('(min-width: 1024px)');
 
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
 	let desktopOpenState: boolean[] | null = null;
@@ -33,19 +26,15 @@ function initMobileSidebar(): () => void {
 	let sidebarLocked = false;
 	let suppressNextFocus = false;
 
-	menuBtn.setAttribute("aria-expanded", "false");
+	menuBtn.setAttribute('aria-expanded', 'false');
 
 	function readOpenState() {
 		if (!sharedSidebarNav) return [];
-		return [
-			...sharedSidebarNav.querySelectorAll<HTMLElement>(
-				"[data-nb-sidebar-group]",
-			),
-		].map(
+		return [...sharedSidebarNav.querySelectorAll<HTMLElement>('[data-nb-sidebar-group]')].map(
 			(group) =>
 				group
-					.querySelector<HTMLElement>("[data-nb-collapsible-trigger]")
-					?.getAttribute("data-nb-state") === "open",
+					.querySelector<HTMLElement>('[data-nb-collapsible-trigger]')
+					?.getAttribute('data-nb-state') === 'open',
 		);
 	}
 
@@ -62,30 +51,24 @@ function initMobileSidebar(): () => void {
 			}
 			return;
 		}
-		group.setAttribute("data-nb-default-open", open ? "true" : "false");
-		const trigger = group.querySelector<HTMLElement>(
-			"[data-nb-collapsible-trigger]",
-		);
-		const panel = group.querySelector<HTMLElement>(
-			"[data-nb-collapsible-content]",
-		);
-		const state = open ? "open" : "closed";
+		group.setAttribute('data-nb-default-open', open ? 'true' : 'false');
+		const trigger = group.querySelector<HTMLElement>('[data-nb-collapsible-trigger]');
+		const panel = group.querySelector<HTMLElement>('[data-nb-collapsible-content]');
+		const state = open ? 'open' : 'closed';
 		if (trigger) {
-			trigger.setAttribute("data-nb-state", state);
-			trigger.setAttribute("aria-expanded", String(open));
+			trigger.setAttribute('data-nb-state', state);
+			trigger.setAttribute('aria-expanded', String(open));
 		}
-		if (panel) panel.setAttribute("data-nb-state", state);
+		if (panel) panel.setAttribute('data-nb-state', state);
 	}
 
 	function applyOpenState(state: boolean[] | null) {
 		if (!sharedSidebarNav || !state) return;
-		[
-			...sharedSidebarNav.querySelectorAll<HTMLElement>(
-				"[data-nb-sidebar-group]",
-			),
-		].forEach((group, index) => {
-			if (typeof state[index] === "boolean") setGroupOpen(group, state[index]);
-		});
+		[...sharedSidebarNav.querySelectorAll<HTMLElement>('[data-nb-sidebar-group]')].forEach(
+			(group, index) => {
+				if (typeof state[index] === 'boolean') setGroupOpen(group, state[index]);
+			},
+		);
 	}
 
 	function moveSidebarToMobile() {
@@ -99,20 +82,18 @@ function initMobileSidebar(): () => void {
 		if (!sharedSidebarNav || !sidebarHome) return;
 		if (sharedSidebarNav.parentElement === mobileSidebarSlot) {
 			const filter = sharedSidebarNav.querySelector<HTMLInputElement>(
-				"[data-nb-sidebar-filter-input]",
+				'[data-nb-sidebar-filter-input]',
 			);
-			if (filter) filter.value = "";
+			if (filter) filter.value = '';
 			sharedSidebarNav
-				.querySelectorAll<HTMLElement>("[data-nb-opened-by-filter]")
+				.querySelectorAll<HTMLElement>('[data-nb-opened-by-filter]')
 				.forEach((group) => {
 					setGroupOpen(group, false);
-					group.removeAttribute("data-nb-opened-by-filter");
+					group.removeAttribute('data-nb-opened-by-filter');
 				});
-			sharedSidebarNav
-				.querySelectorAll<HTMLElement>("[data-nb-sidebar-hidden]")
-				.forEach((el) => {
-					el.removeAttribute("data-nb-sidebar-hidden");
-				});
+			sharedSidebarNav.querySelectorAll<HTMLElement>('[data-nb-sidebar-hidden]').forEach((el) => {
+				el.removeAttribute('data-nb-sidebar-hidden');
+			});
 			mobileOpenState = readOpenState();
 			sidebarHome.appendChild(sharedSidebarNav);
 			applyOpenState(desktopOpenState);
@@ -126,8 +107,8 @@ function initMobileSidebar(): () => void {
 			closeTimer = undefined;
 		}
 
-		dialog.dataset.state = "closed";
-		menuBtn.setAttribute("aria-expanded", "false");
+		dialog.dataset.state = 'closed';
+		menuBtn.setAttribute('aria-expanded', 'false');
 		restoreSidebarToDesktop();
 		if (sidebarLocked) {
 			unlockScroll();
@@ -145,24 +126,24 @@ function initMobileSidebar(): () => void {
 
 		moveSidebarToMobile();
 		dialog.showModal();
-		dialog.dataset.state = "closed";
-		menuBtn.setAttribute("aria-expanded", "true");
+		dialog.dataset.state = 'closed';
+		menuBtn.setAttribute('aria-expanded', 'true');
 		lockScroll();
 		sidebarLocked = true;
 
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
-				dialog.dataset.state = "open";
+				dialog.dataset.state = 'open';
 			});
 		});
 
-		dialog.querySelector<HTMLElement>("[data-close-sidebar]")?.focus();
+		dialog.querySelector<HTMLElement>('[data-close-sidebar]')?.focus();
 	}
 
 	function closeSidebar() {
-		if (!dialog.open || dialog.dataset.state === "closing") return;
+		if (!dialog.open || dialog.dataset.state === 'closing') return;
 
-		dialog.dataset.state = "closing";
+		dialog.dataset.state = 'closing';
 		closeTimer = setTimeout(() => {
 			dialog.close();
 		}, CLOSE_DURATION_MS);
@@ -186,13 +167,13 @@ function initMobileSidebar(): () => void {
 		if (event.matches && dialog.open) dialog.close();
 	}
 
-	const closeButton = dialog.querySelector<HTMLElement>("[data-close-sidebar]");
-	menuBtn.addEventListener("click", openSidebar);
-	closeButton?.addEventListener("click", closeSidebar);
-	dialog.addEventListener("cancel", handleCancel);
-	dialog.addEventListener("close", handleClose);
-	dialog.addEventListener("click", handleDialogClick);
-	desktopMq.addEventListener("change", handleDesktopChange);
+	const closeButton = dialog.querySelector<HTMLElement>('[data-close-sidebar]');
+	menuBtn.addEventListener('click', openSidebar);
+	closeButton?.addEventListener('click', closeSidebar);
+	dialog.addEventListener('cancel', handleCancel);
+	dialog.addEventListener('close', handleClose);
+	dialog.addEventListener('click', handleDialogClick);
+	desktopMq.addEventListener('change', handleDesktopChange);
 
 	return () => {
 		suppressNextFocus = true;
@@ -200,12 +181,12 @@ function initMobileSidebar(): () => void {
 			clearTimeout(closeTimer);
 			closeTimer = undefined;
 		}
-		menuBtn.removeEventListener("click", openSidebar);
-		closeButton?.removeEventListener("click", closeSidebar);
-		dialog.removeEventListener("cancel", handleCancel);
-		dialog.removeEventListener("close", handleClose);
-		dialog.removeEventListener("click", handleDialogClick);
-		desktopMq.removeEventListener("change", handleDesktopChange);
+		menuBtn.removeEventListener('click', openSidebar);
+		closeButton?.removeEventListener('click', closeSidebar);
+		dialog.removeEventListener('cancel', handleCancel);
+		dialog.removeEventListener('close', handleClose);
+		dialog.removeEventListener('click', handleDialogClick);
+		desktopMq.removeEventListener('change', handleDesktopChange);
 		if (dialog.open) dialog.close();
 		finishClose(false);
 	};
@@ -216,9 +197,9 @@ function setupMobileSidebar() {
 	cleanupCurrent = initMobileSidebar();
 }
 
-document.addEventListener("astro:before-swap", () => {
+document.addEventListener('astro:before-swap', () => {
 	cleanupCurrent?.();
 	cleanupCurrent = undefined;
 });
-document.addEventListener("astro:page-load", setupMobileSidebar);
+document.addEventListener('astro:page-load', setupMobileSidebar);
 setupMobileSidebar();
