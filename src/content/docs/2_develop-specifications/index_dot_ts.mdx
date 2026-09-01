@@ -3,7 +3,6 @@ title: index.ts文件作用
 description: index.ts文件作用
 ---
 
-
 ![Worker 项目中 src/index.ts 入口文件位置](./img.png)
 
 每个项目里的 index.ts 是什么作用?
@@ -13,9 +12,10 @@ description: index.ts文件作用
 Cloudflare's runtime calls it automatically when that event occurs. You don't call them yourself — the platform does.
 
 Defines event handlers— It exports the functions that Cloudflare invokes, most commonly:
-* fetch— handles incoming HTTP requests
-* scheduled— runs on a cron trigger
-* queue— processes messages from a Queue
-* email— handles incoming emails
+
+- fetch— handles incoming HTTP requests
+- scheduled— runs on a cron trigger
+- queue— processes messages from a Queue
+- email— handles incoming emails
 
 文件名默认是index.ts，你也可以指定其他名称，但需要在配置文件中映射下。

@@ -4,7 +4,6 @@ title: Git Remote 切换
 
 > 权威副本：`cloudflare_work/docs/git-remote-protocol.md`
 
-
 脚本：仓库根目录 [`git-remote-protocol.sh`](../git-remote-protocol.sh)
 
 在指定目录下递归查找 git 仓库，批量改写 `origin`（或全部 remote）的 URL。默认只预览，不会改写。
@@ -17,11 +16,11 @@ title: Git Remote 切换
 
 ## 模式对照
 
-| 模式 | 目标 URL 形态 |
-|------|----------------|
-| `ssh` | `git@host:owner/repo.git`（Cursor Origin 会 SKIP，仅 HTTPS） |
-| `https` | `https://host/owner/repo.git` |
-| `cursor` | `https://origin.cursor.com/origin-ongoing/<repo>.git` |
+| 模式     | 目标 URL 形态                                                                 |
+| -------- | ----------------------------------------------------------------------------- |
+| `ssh`    | `git@host:owner/repo.git`（Cursor Origin 会 SKIP，仅 HTTPS）                  |
+| `https`  | `https://host/owner/repo.git`                                                 |
+| `cursor` | `https://origin.cursor.com/origin-ongoing/<repo>.git`                         |
 | `github` | `https://github.com/<owner>/<repo>.git`（优先恢复 `remote.<name>.githuburl`） |
 
 同时识别并归一化：
@@ -67,43 +66,43 @@ title: Git Remote 切换
 
 ## 环境变量
 
-| 变量 | 默认 | 说明 |
-|------|------|------|
-| `CURSOR_HOST` | `origin.cursor.com` | Cursor Origin 主机 |
-| `CURSOR_NS` | `origin-ongoing` | Origin namespace（URL 路径段） |
-| `GITHUB_HOST` | `github.com` | GitHub 主机 |
-| `GITHUB_DEFAULT_OWNER` | `workers-world` | 无保存 URL 时的默认 org |
+| 变量                   | 默认                | 说明                           |
+| ---------------------- | ------------------- | ------------------------------ |
+| `CURSOR_HOST`          | `origin.cursor.com` | Cursor Origin 主机             |
+| `CURSOR_NS`            | `origin-ongoing`    | Origin namespace（URL 路径段） |
+| `GITHUB_HOST`          | `github.com`        | GitHub 主机                    |
+| `GITHUB_DEFAULT_OWNER` | `workers-world`     | 无保存 URL 时的默认 org        |
 
 ## GitHub owner 推断（`github` 模式、无 `githuburl` 时）
 
-| 仓库名 | owner |
-|--------|-------|
-| `scripts`、`blog-r2-tools` | `ONGOING-Z` |
-| `cloudflare_work` | SKIP（meta 仓目前仅在 Origin） |
-| 其余 | `workers-world`（或 `GITHUB_DEFAULT_OWNER`） |
+| 仓库名                     | owner                                        |
+| -------------------------- | -------------------------------------------- |
+| `scripts`、`blog-r2-tools` | `ONGOING-Z`                                  |
+| `cloudflare_work`          | SKIP（meta 仓目前仅在 Origin）               |
+| 其余                       | `workers-world`（或 `GITHUB_DEFAULT_OWNER`） |
 
 从 GitHub 切到 `cursor` 时，脚本会写入 `remote.<name>.githuburl` 保存原 URL，便于 `github` 模式准确还原（混 org 时尤其重要）。
 
 ## 参数说明
 
-| 参数 | 说明 |
-|------|------|
-| `ssh` / `https` / `cursor` / `github` | 必填，目标模式 |
-| `DIR` | 可选，扫描根目录，默认当前目录 |
-| `--apply` | 预览后进入确认并写入；不加则始终 dry-run |
-| `--yes` | 仅与 `--apply` 同用，跳过确认 |
-| `--all-remotes` | 处理所有 remote；默认只改 `origin` |
-| `-h` / `--help` | 打印简短帮助 |
+| 参数                                  | 说明                                     |
+| ------------------------------------- | ---------------------------------------- |
+| `ssh` / `https` / `cursor` / `github` | 必填，目标模式                           |
+| `DIR`                                 | 可选，扫描根目录，默认当前目录           |
+| `--apply`                             | 预览后进入确认并写入；不加则始终 dry-run |
+| `--yes`                               | 仅与 `--apply` 同用，跳过确认            |
+| `--all-remotes`                       | 处理所有 remote；默认只改 `origin`       |
+| `-h` / `--help`                       | 打印简短帮助                             |
 
 ## 输出含义
 
-| 前缀 | 含义 |
-|------|------|
-| `PLAN` | 将从旧 URL 改为新 URL（待变更） |
-| `OK` | 已是目标，跳过 |
-| `SKIP` | 无 remote / 无 URL / 无法解析 / Cursor 禁 SSH 等，跳过 |
-| `CHANGED` | `--apply` 确认后写入成功 |
-| `FAIL` | `git remote set-url` 失败 |
+| 前缀      | 含义                                                   |
+| --------- | ------------------------------------------------------ |
+| `PLAN`    | 将从旧 URL 改为新 URL（待变更）                        |
+| `OK`      | 已是目标，跳过                                         |
+| `SKIP`    | 无 remote / 无 URL / 无法解析 / Cursor 禁 SSH 等，跳过 |
+| `CHANGED` | `--apply` 确认后写入成功                               |
+| `FAIL`    | `git remote set-url` 失败                              |
 
 汇总行含：扫描根目录、目标模式、仓库数、待变更 / 已是目标 / 跳过数量。
 

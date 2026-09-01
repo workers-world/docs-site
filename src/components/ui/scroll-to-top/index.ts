@@ -1,1 +1,1 @@
-export { default as ScrollToTop } from "./ScrollToTop.astro";
+export { default as ScrollToTop } from './ScrollToTop.astro';

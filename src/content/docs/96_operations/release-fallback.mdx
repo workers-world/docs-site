@@ -3,16 +3,15 @@ title: 应急发布(待整改)
 description: 应急发布
 ---
 
-
 ---
 
 ## 何时使用
 
-| 场景 | 是否本地 deploy |
-|------|----------------|
-| 日常开发 / 常规发布 | **否** — push `relay/dev_*` → Gitea mirror；需要时再手动 FF / CI |
-| Gitea 或 GitHub 长时间不可达，业务必须先修线上 | **是** — 本文流程 |
-| 仅本机联调 | `wrangler dev`，不必 deploy |
+| 场景                                           | 是否本地 deploy                                                  |
+| ---------------------------------------------- | ---------------------------------------------------------------- |
+| 日常开发 / 常规发布                            | **否** — push `relay/dev_*` → Gitea mirror；需要时再手动 FF / CI |
+| Gitea 或 GitHub 长时间不可达，业务必须先修线上 | **是** — 本文流程                                                |
+| 仅本机联调                                     | `wrangler dev`，不必 deploy                                      |
 
 **不要**把本地 `npm run deploy` 当作常规路径（无 GHA 门禁、deploy-tracker 可能无记录、易与 `master` 漂移）。
 
@@ -25,12 +24,14 @@ description: 应急发布
     **确认本机 Cloudflare 凭证**
 
     `CLOUDFLARE_API_TOKEN` / `wrangler login` 已可用（与生产账号一致）。
+
   </Step>
   <Step>
     **依赖**
 
     - 优先：本地已 `npm ci`，SDK 可用 `file:../framework_sdk_worker` 旁路联调。
     - 若 `package.json` 指向 GitHub Packages，需本机 `NODE_AUTH_TOKEN` 或临时改回 `file:`（**勿提交**临时改动，或事后还原）。
+
   </Step>
   <Step>
     **门禁（本地）**
@@ -39,6 +40,7 @@ description: 应急发布
     cd <worker>
     npm run check && npm test
     ```
+
   </Step>
   <Step>
     **部署**
@@ -49,11 +51,13 @@ description: 应急发布
     ```
 
     有 D1 的 Worker 另按 CF Builds 模板执行 `wrangler d1 migrations apply … --remote`。
+
   </Step>
   <Step>
     **冒烟**
 
     `curl` health / 关键业务路径；需要时 `wrangler tail`。
+
   </Step>
 </Steps>
 

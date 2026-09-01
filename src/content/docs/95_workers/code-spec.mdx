@@ -28,21 +28,21 @@ src/
 
 ### 职责边界
 
-| 层 | 能调用 | 禁止 |
-|----|--------|------|
-| `routes/` | `services/`、`queue/` | 直接访问 `env.KV_*`、`env.DB_*`、`env.SVC_*` 等 binding |
-| `services/` | env bindings、SDK、其他 `services/` | 调用 `routes/` |
-| `queue/` | `services/` | 调用 `routes/` |
-| `index.ts` | `services/`、`routes/`、`queue/` | 写业务逻辑 |
-| Agent / DO 类 | `services/`、SDK | 在类内 inline 持久化 SQL（应抽到 store） |
+| 层            | 能调用                              | 禁止                                                    |
+| ------------- | ----------------------------------- | ------------------------------------------------------- |
+| `routes/`     | `services/`、`queue/`               | 直接访问 `env.KV_*`、`env.DB_*`、`env.SVC_*` 等 binding |
+| `services/`   | env bindings、SDK、其他 `services/` | 调用 `routes/`                                          |
+| `queue/`      | `services/`                         | 调用 `routes/`                                          |
+| `index.ts`    | `services/`、`routes/`、`queue/`    | 写业务逻辑                                              |
+| Agent / DO 类 | `services/`、SDK                    | 在类内 inline 持久化 SQL（应抽到 store）                |
 
 ## 3. 持久层命名
 
-| 场景 | 文件命名 | 示例 |
-|------|----------|------|
-| D1 表 CRUD | `services/{表名}-store.ts` | `advice-store.ts`、`d1-store.ts` |
-| 只读 / 复杂查询 | `services/*-query.ts` | Dashboard 筛选列表 |
-| DO 内嵌 SQLite | `services/{表名}-store.ts` | `qa-history-store.ts` |
+| 场景            | 文件命名                   | 示例                             |
+| --------------- | -------------------------- | -------------------------------- |
+| D1 表 CRUD      | `services/{表名}-store.ts` | `advice-store.ts`、`d1-store.ts` |
+| 只读 / 复杂查询 | `services/*-query.ts`      | Dashboard 筛选列表               |
+| DO 内嵌 SQLite  | `services/{表名}-store.ts` | `qa-history-store.ts`            |
 
 **禁止**：根目录 `db.ts`、随意新建 `repos/`（除非单个 store 过大再拆）。
 
@@ -52,20 +52,20 @@ D1 读写只放在 `services/*-store.ts`，使用 `env.DB_*.prepare(...).bind(..
 
 ### 文件顶部
 
-| 形式 | 用途 |
-|------|------|
+| 形式                               | 用途                               |
+| ---------------------------------- | ---------------------------------- |
 | `const QUERIES = { ... } as const` | 完整、静态 SQL（CRUD、固定 WHERE） |
-| `SELECT_FIELDS` / `JOIN_*` | 多查询共享片段 |
-| `buildWhere()` / `buildFilter()` | 动态条件 → `{ clause, binds }` |
+| `SELECT_FIELDS` / `JOIN_*`         | 多查询共享片段                     |
+| `buildWhere()` / `buildFilter()`   | 动态条件 → `{ clause, binds }`     |
 
 ```typescript
 const QUERIES = {
-  getById: `SELECT id, name FROM users WHERE id = ?`,
-  insert: `INSERT INTO users (name, email) VALUES (?, ?)`,
+	getById: `SELECT id, name FROM users WHERE id = ?`,
+	insert: `INSERT INTO users (name, email) VALUES (?, ?)`,
 } as const;
 
 export async function getUser(env: Env, id: number) {
-  return env.DB.prepare(QUERIES.getById).bind(id).first();
+	return env.DB.prepare(QUERIES.getById).bind(id).first();
 }
 ```
 
@@ -92,12 +92,12 @@ Agents SDK / Think 的 Durable Object 使用 **`this.sql` tagged template**（DO
 ```typescript
 /** 与 Agents SDK SqlProvider 对齐 */
 export type QaHistorySql = <T = Record<string, string | number | boolean | null>>(
-  strings: TemplateStringsArray,
-  ...values: (string | number | boolean | null)[]
+	strings: TemplateStringsArray,
+	...values: (string | number | boolean | null)[]
 ) => T[];
 
 export function listRecentTurnRows(sql: QaHistorySql, limit: number): QaHistoryRow[] {
-  return sql<QaHistoryRow>`
+	return sql<QaHistoryRow>`
     SELECT question, answer, source, created_at
     FROM qa_history ORDER BY id DESC LIMIT ${limit}
   `;
@@ -134,12 +134,12 @@ override onStart(): void {
 持久层只做：**建表、读写 raw rows、retention 剪除、Env 配置解析**。
 业务规则留在 Agent / `services/` 编排层。
 
-| 职责 | 归属 | 示例 |
-|------|------|------|
-| `SELECT` / `INSERT` / `DELETE` | store | `listRecentTurnRows`、`insertQaTurn`、`pruneQaHistory` |
-| 是否写入（fallback 不写） | 业务层 | `isUsefulAnswer(answer) && !result.fallback` |
-| 哪些历史进 LLM prompt | 业务层 | `filter(isUsefulAnswer)`、`reverse`、映射为领域类型 |
-| Env 缺省与正整数校验 | store 或 store 内 config 函数 | `resolveQaHistoryConfig(env)` |
+| 职责                           | 归属                          | 示例                                                   |
+| ------------------------------ | ----------------------------- | ------------------------------------------------------ |
+| `SELECT` / `INSERT` / `DELETE` | store                         | `listRecentTurnRows`、`insertQaTurn`、`pruneQaHistory` |
+| 是否写入（fallback 不写）      | 业务层                        | `isUsefulAnswer(answer) && !result.fallback`           |
+| 哪些历史进 LLM prompt          | 业务层                        | `filter(isUsefulAnswer)`、`reverse`、映射为领域类型    |
+| Env 缺省与正整数校验           | store 或 store 内 config 函数 | `resolveQaHistoryConfig(env)`                          |
 
 ```mermaid
 flowchart TB
@@ -172,7 +172,7 @@ this.sql`INSERT INTO qa_history ...`;
 
 // ❌ 把 isUsefulAnswer 过滤放进 store
 export function listRecentTurnRows(sql, limit) {
-  return rows.filter((r) => isUsefulAnswer(r.answer)); // 业务规则泄漏
+	return rows.filter((r) => isUsefulAnswer(r.answer)); // 业务规则泄漏
 }
 
 // ❌ 根目录 db.ts
@@ -221,24 +221,24 @@ rg -l 'prepare\(\s*`' --glob '*.{ts,js}' | rg -v '/services/|/test/|97_cloudflar
 
 ### 整改状态（2026-08）
 
-| Worker | 状态 | 主要 store |
-|--------|------|------------|
-| market-qa-agent | ✅ 样板 | `qa-history-store.ts`（DO SQLite） |
-| audit-log-worker | ✅ | `maintenance-log-store.ts` |
-| browser_run | ✅ | `task-store.ts` |
-| counter-worker | ✅ | `generate-id.ts` / `d1-sequence-store.ts` |
-| fund-monitor-worker | ✅ | `d1-store.ts` |
-| config-agent | ✅ | `operation-log-store.ts` |
-| llm-gateway-worker | ✅ | `gateway-events-store.ts` |
-| email-rule-worker | ✅ | `digest-store.ts` |
-| advisor-worker | ✅ | `advice-store.ts`、`quota.ts` |
-| decision-desk-worker | ✅ | `draft-store.ts`、`signal-buffer.ts` |
-| lib-newbook-worker | ✅ | `newbook-store.ts`、`notify-clc-store.ts` |
-| my-blog-subscribe-worker | ✅ | `subscriber-store.ts` 等 |
-| container-mirror-host | ✅ | `job-store.ts` |
-| invest-rss-worker | ✅ | 多 `services/*` QUERIES 化 |
-| deploy-tracker-worker | ✅ | 全 `services/*` + cron 经 store |
-| r2-image-transform-worker | ✅ | `services/image-access-store.js` |
-| cloudflare-os | ⏸ 暂缓 | 与业务 Worker 规范独立 |
+| Worker                    | 状态    | 主要 store                                |
+| ------------------------- | ------- | ----------------------------------------- |
+| market-qa-agent           | ✅ 样板 | `qa-history-store.ts`（DO SQLite）        |
+| audit-log-worker          | ✅      | `maintenance-log-store.ts`                |
+| browser_run               | ✅      | `task-store.ts`                           |
+| counter-worker            | ✅      | `generate-id.ts` / `d1-sequence-store.ts` |
+| fund-monitor-worker       | ✅      | `d1-store.ts`                             |
+| config-agent              | ✅      | `operation-log-store.ts`                  |
+| llm-gateway-worker        | ✅      | `gateway-events-store.ts`                 |
+| email-rule-worker         | ✅      | `digest-store.ts`                         |
+| advisor-worker            | ✅      | `advice-store.ts`、`quota.ts`             |
+| decision-desk-worker      | ✅      | `draft-store.ts`、`signal-buffer.ts`      |
+| lib-newbook-worker        | ✅      | `newbook-store.ts`、`notify-clc-store.ts` |
+| my-blog-subscribe-worker  | ✅      | `subscriber-store.ts` 等                  |
+| container-mirror-host     | ✅      | `job-store.ts`                            |
+| invest-rss-worker         | ✅      | 多 `services/*` QUERIES 化                |
+| deploy-tracker-worker     | ✅      | 全 `services/*` + cron 经 store           |
+| r2-image-transform-worker | ✅      | `services/image-access-store.js`          |
+| cloudflare-os             | ⏸ 暂缓  | 与业务 Worker 规范独立                    |
 
 各 Worker 目录执行 `npm run check` 通过后方可合并。
