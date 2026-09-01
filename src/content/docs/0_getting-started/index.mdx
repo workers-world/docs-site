@@ -21,3 +21,18 @@ npm run build  # 提交前验证
 3. 开 PR → CF Pages preview 构建检查
 4. 合入 `master` → production 构建
 
+
+### 如何查看worker的代码
+
+1. 找到入口处
+找到根目录下的index.tx文件
+
+业务代码需要去填充平台的handler函数
+这些函数是由平台去触发的。
+
+最常见的就是 fetch() 函数
+https://developers.cloudflare.com/workers/runtime-apis/handlers/fetch/
+
+当然还有其他的一些队列、邮件、定时任务等的触发，查看下平台docs即可。
+
+2、找到入口之后，就可以顺着入口的调用逻辑往下看了。
