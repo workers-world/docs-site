@@ -1,0 +1,155 @@
+---
+title: Draw.io MCP（Cursor 本地）
+description: 在 Cursor 中通过官方 @drawio/mcp 本地 MCP 服务画图，图数据不经过 mcp.draw.io 远程端点。
+---
+
+> 上游仓库：[jgraph/drawio-mcp](https://github.com/jgraph/drawio-mcp)  
+> npm 包：[`@drawio/mcp`](https://www.npmjs.com/package/@drawio/mcp)
+
+在 Cursor Agent 里用自然语言生成架构图、流程图，并在 draw.io 编辑器中打开或编辑。本页记录**本地 stdio 安装**方式：MCP 进程跑在本机，**不会**把图内容发到官方托管端点 `https://mcp.draw.io/mcp`。
+
+## 方案对比
+
+| 方案 | 图数据是否离开本机 | 安装 | 适用 |
+|------|-------------------|------|------|
+| **MCP Tool Server**（`@drawio/mcp`，推荐） | 否 — 内容在浏览器 URL `#fragment`，不随 HTTP 请求上传 | `npm install -g` | 本地开发、隐私敏感 |
+| **MCP App Server**（`https://mcp.draw.io/mcp`） | **是** — 请求发往 draw.io 云端 | 一键 URL | 需要聊天内嵌预览、可接受上云 |
+
+下文仅描述 **Tool Server 本地安装**。
+
+## 前置条件
+
+- **Node.js** ≥ 18（`node -v`）
+- **Cursor**（Settings → MCP 支持 stdio）
+- 可选：**draw.io Desktop**（`/Applications/draw.io.app`），用于直接打开 `.drawio` 文件
+
+## 1. 安装 MCP 包
+
+```bash
+npm install -g @drawio/mcp --registry https://registry.npmjs.org
+npm install -g --allow-scripts=@drawio/mcp @drawio/mcp --registry https://registry.npmjs.org
+```
+
+第二条命令会执行 `postinstall`，预拉取 libavoid 路由脚本缓存（可选，失败不影响安装）。
+
+验证：
+
+```bash
+drawio-mcp --version
+which drawio-mcp
+# 期望：/opt/homebrew/bin/drawio-mcp（Homebrew Node 环境）
+```
+
+## 2. 配置 Cursor MCP
+
+编辑全局配置 `~/.cursor/mcp.json`（或项目级 `.cursor/mcp.json`），加入 `drawio` 条目：
+
+```json
+{
+  "mcpServers": {
+    "drawio": {
+      "command": "/opt/homebrew/bin/drawio-mcp",
+      "env": {
+        "DRAWIO_ICON_SERVICE_URL": "off"
+      }
+    }
+  }
+}
+```
+
+说明：
+
+- `command` 填 `which drawio-mcp` 输出的绝对路径（不同机器可能不同）。
+- **不要**再配置 `"url": "https://mcp.draw.io/mcp"`，否则会走远程 App Server。
+- `DRAWIO_ICON_SERVICE_URL=off`：关闭 `icons.diagrams.net` 图标补充搜索，减少外网请求。
+
+## 3. 缓存图形索引（推荐，离线 search_shapes）
+
+默认首次 `search_shapes` 会从 CDN 拉取约 4.6MB 的图形索引。可一次性缓存到全局包目录：
+
+```bash
+curl -fsSL -o "$(npm root -g)/@drawio/mcp/src/search-index.json" \
+  "https://cdn.jsdelivr.net/gh/jgraph/drawio-mcp@main/shape-search/search-index.json"
+```
+
+之后 `search_shapes` 读本地文件，无需再访问 CDN。
+
+## 4. 启用并重载
+
+1. 打开 **Cursor Settings → MCP**
+2. 找到 `drawio`，确认已启用（绿色 / ready）
+3. 若刚改配置，点重启 MCP 或重启 Cursor
+
+在 Agent 对话中可直接说：
+
+- 「用 Mermaid 画一张 OAuth2 认证流程图」
+- 「读取 `docs/workers-account-我的.drawio` 并说明结构」
+- 「用 AWS 图标画 VPC 架构图」（会调用 `search_shapes`）
+
+## 可用工具
+
+| 工具 | 用途 |
+|------|------|
+| `open_drawio_xml` | 用 draw.io XML 在编辑器中打开图 |
+| `open_drawio_mermaid` | 用 Mermaid 语法生成并打开图 |
+| `open_drawio_csv` | 用 CSV 生成组织图、流程图等 |
+| `search_shapes` | 搜索 AWS / Azure / GCP / Kubernetes 等内置图形库 |
+| `list_pages` | 列出本地 `.drawio` 文件中的页 |
+| `get_page` | 读取某一页的 `mxGraphModel` XML |
+| `set_page` | 替换本地 `.drawio` 文件中某一页内容 |
+
+## 数据与网络行为
+
+**本地 Tool Server 保证：**
+
+- MCP stdio 进程在本机运行，图内容**不经过** `mcp.draw.io`
+- 打开图时，内容压缩后放在 URL 的 `#create=` **fragment** 中；浏览器**不会**把 fragment 发给服务器
+
+**仍可能产生的外网请求（按需知晓）：**
+
+| 场景 | 目标 | 内容 |
+|------|------|------|
+| 打开编辑器（默认） | `app.diagrams.net` | 仅加载 draw.io **前端代码**，图数据在本地 fragment |
+| `search_shapes`（未缓存索引） | `cdn.jsdelivr.net` | 图形索引 JSON |
+| `search_shapes`（未设 `off`） | `icons.diagrams.net` | 品牌 / 概念图标 |
+| `routing: "libavoid"` 首次 | `viewer.diagrams.net` | 边路由脚本 |
+
+若要进一步减少外网依赖，可自建 draw.io 实例并在 `env` 中设置：
+
+```json
+"env": {
+  "DRAWIO_ICON_SERVICE_URL": "off",
+  "DRAWIO_BASE_URL": "https://drawio.example.com/"
+}
+```
+
+## 可选：一键安装（远程 App Server）
+
+若**不介意图内容上云**、且需要 Cursor 聊天内**内嵌预览**，可用官方一键安装（**与本页本地方案二选一**）：
+
+[Cursor 一键安装 draw.io MCP App](https://cursor.com/en/install-mcp?name=drawio&config=eyJ1cmwiOiJodHRwczovL21jcC5kcmF3LmlvL21jcCJ9)
+
+等价配置：
+
+```json
+"drawio": {
+  "url": "https://mcp.draw.io/mcp",
+  "type": "http"
+}
+```
+
+## 故障排查
+
+| 现象 | 处理 |
+|------|------|
+| MCP 显示 error / 未连接 | 检查 `drawio-mcp` 路径、`node -v`；在终端手动运行 `drawio-mcp` 看是否报错 |
+| `search_shapes` 超时 | 执行上文「缓存图形索引」步骤 |
+| 图在浏览器打不开 | 确认系统默认浏览器可用；macOS 上依赖 `open` 命令 |
+| npm 装包失败 | 指定 `--registry https://registry.npmjs.org`（避免镜像源缺包） |
+| 需要完全离线 | `DRAWIO_ICON_SERVICE_URL=off` + 本地索引 + 自托管 `DRAWIO_BASE_URL` |
+
+## 相关资源
+
+- [draw.io](https://www.draw.io) — 在线编辑器
+- [draw.io Desktop](https://github.com/jgraph/drawio-desktop) — macOS 桌面版
+- [drawio-mcp README](https://github.com/jgraph/drawio-mcp/blob/main/mcp-tool-server/README.md) — 官方 Tool Server 文档

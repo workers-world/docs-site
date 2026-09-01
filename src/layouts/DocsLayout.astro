@@ -1,0 +1,304 @@
+---
+/**
+ * DocsLayout — official Nimbus three-column docs shell.
+ */
+import Icon from "@cloudflare/nimbus-docs/components/Icon.astro";
+import BaseLayout from "./BaseLayout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { Banner } from "@/components/ui/banner";
+import {
+	Sidebar,
+	SidebarFilter,
+	SidebarProductNav,
+	SidebarStateRestore,
+} from "@/components/ui/sidebar";
+import { TOC, MobileTOC } from "@/components/ui/toc";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Pagination } from "@/components/ui/pagination";
+import { PageActions, PageActionLinks } from "@/components/ui/page-actions";
+import { Badge } from "@/components/ui/badge";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import type { DocsPageProps } from "@cloudflare/nimbus-docs/types";
+import { marked } from "marked";
+import { getSectionTitle } from "@cloudflare/nimbus-docs";
+import { sectionTitleResolver } from "@/util/sidebar";
+
+type Props = DocsPageProps & {
+	wide?: boolean;
+	hideTitle?: boolean;
+	summary?: string;
+};
+
+const {
+	title,
+	description,
+	summary,
+	sidebar,
+	headings,
+	breadcrumbs,
+	prevNext,
+	mode = "doc",
+	banner,
+	head = [],
+	noindex,
+	markdownUrl,
+	socialImage,
+	lastUpdated,
+	editUrl,
+	draft,
+	collection,
+	entryId,
+	wide = false,
+	hideTitle = false,
+} = Astro.props;
+
+const isCustom = mode === "custom";
+const showSidebar = sidebar !== false;
+const productSlug = Astro.url.pathname.split("/").filter(Boolean)[0] ?? null;
+const sectionTitle = await getSectionTitle(
+	Astro.url.pathname,
+	sectionTitleResolver,
+);
+const breadcrumbItems = (breadcrumbs ?? []).map((c, i) =>
+	i === 1 && !c.href && productSlug ? { ...c, href: `/${productSlug}/` } : c,
+);
+const product = productSlug
+	? {
+			title: sectionTitle?.rail ?? breadcrumbItems[1]?.label ?? productSlug,
+			href: `/${productSlug}/`,
+		}
+	: null;
+
+const hasHeader = Astro.slots.has("header");
+const hasSidebar = Astro.slots.has("sidebar");
+const hasToc = Astro.slots.has("toc");
+const hasPageTitle = Astro.slots.has("page-title");
+const hasContentFooter = Astro.slots.has("content-footer");
+const showActions = true;
+const hasPagination = Astro.slots.has("pagination");
+const hasTocAside = headings !== false;
+---
+
+<BaseLayout
+	title={title}
+	description={description}
+	noindex={noindex || draft}
+	markdownUrl={markdownUrl}
+	socialImage={socialImage}
+	lastUpdated={lastUpdated}
+	head={head}
+	collection={collection}
+	entryId={entryId}
+	footer={false}
+>
+	<div class="flex min-h-screen flex-col">
+		{
+			hasHeader ? (
+				<slot name="header" />
+			) : (
+				<Header
+					collection={collection}
+					entryId={entryId}
+					showSidebar={showSidebar}
+				/>
+			)
+		}
+
+		{
+			isCustom ? (
+				<>
+					<main id="main-content" class="flex-1">
+						<slot />
+					</main>
+					<Footer />
+				</>
+			) : (
+				<div class="mx-auto flex w-full flex-1 flex-col">
+					<div class="flex flex-1">
+						{showSidebar && (
+							<aside
+								id="desktop-sidebar"
+								data-nb-desktop-sidebar
+								class="border-border relative sticky top-14 hidden max-h-[calc(100vh-3.5rem)] w-(--nb-sidebar-width) shrink-0 flex-col overflow-y-auto border-r lg:flex"
+							>
+								{hasSidebar ? (
+									<div data-sidebar-home class="flex-1">
+										<div
+											data-shared-sidebar-nav
+											class="flex-1 pb-12 max-lg:pb-8"
+										>
+											<slot name="sidebar" />
+										</div>
+									</div>
+								) : (
+									<div data-sidebar-home class="flex-1">
+										<nav
+											data-shared-sidebar-nav
+											class="flex-1 pb-12 max-lg:pb-8"
+										>
+											<div class="bg-background z-10 px-4 pb-3 lg:sticky lg:top-0">
+												{product && (
+													<SidebarProductNav
+														title={product.title}
+														href={product.href}
+														class="py-2.5"
+													/>
+												)}
+												<SidebarFilter class="mb-0" />
+											</div>
+											<div class="px-4 pt-2">
+												<Sidebar items={sidebar} persist />
+											</div>
+										</nav>
+									</div>
+								)}
+								<div class="from-base pointer-events-none sticky bottom-0 h-8 bg-gradient-to-t to-transparent" />
+							</aside>
+						)}
+
+						{showSidebar && <SidebarStateRestore />}
+
+						<div class="flex min-w-0 flex-1 flex-col">
+							<div class="flex min-w-0 flex-1">
+								<main id="main-content" class="min-w-0 flex-1">
+									<div
+										class={`mx-auto px-4 pt-6 pb-12 lg:px-6 ${wide ? "max-w-[1400px]" : "max-w-(--nb-content-max)"}`}
+									>
+										{banner && (
+											<Banner
+												content={banner.content}
+												variant={banner.type}
+												dismissible={banner.dismissible}
+											/>
+										)}
+										<Breadcrumbs items={breadcrumbItems} class="pb-2" />
+										<div id="_top">
+											{hasPageTitle ? (
+												<slot name="page-title" />
+											) : hideTitle ? null : (
+												<>
+													<div class="mt-6 flex flex-wrap items-center gap-3">
+														<h1
+															class="text-foreground mb-0 leading-tight"
+															style={`font-size:var(--nb-h1-size);font-weight:var(--nb-h1-weight);letter-spacing:var(--nb-h1-tracking)`}
+														>
+															{title}
+														</h1>
+														{draft && (
+															<Badge
+																text="Draft"
+																variant="warning"
+																size="medium"
+															/>
+														)}
+													</div>
+													{summary && (
+														<div
+															class="text-muted-foreground mt-2 text-lg leading-relaxed"
+															set:html={marked.parse(summary)}
+														/>
+													)}
+													<PageActions
+														markdownUrl={markdownUrl}
+														lastUpdated={lastUpdated}
+														class="mt-3"
+													/>
+													{headings !== false && headings.length > 0 && (
+														<div class="border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-14 z-20 -mx-4 mt-3 border-y px-4 py-2 backdrop-blur lg:-mx-6 lg:px-6 xl:hidden">
+															<MobileTOC headings={headings} />
+														</div>
+													)}
+													{markdownUrl ? (
+														<div
+															class="xl:bg-border mt-3 mb-6 h-px w-full bg-transparent"
+															role="none"
+														/>
+													) : (
+														<div class="mb-4" />
+													)}
+												</>
+											)}
+											<article class="docs-content max-w-none">
+												<slot />
+											</article>
+											{hasContentFooter && <slot name="content-footer" />}
+										</div>
+										{hasPagination ? (
+											<slot name="pagination" />
+										) : (
+											<Pagination prevNext={prevNext} />
+										)}
+										{showActions && (
+											<div
+												class:list={[
+													"mt-10 flex flex-col gap-5",
+													hasTocAside && "xl:hidden",
+												]}
+											>
+												<PageActionLinks editUrl={editUrl} />
+											</div>
+										)}
+									</div>
+								</main>
+
+								{headings !== false && (
+									<aside
+										data-nb-toc-scroll-host
+										class="sticky top-14 hidden max-h-[calc(100vh-3.5rem)] w-(--nb-toc-width) shrink-0 overflow-y-auto xl:block"
+									>
+										<div class="pt-6 pr-6 pb-8 pl-8">
+											{hasToc ? (
+												<slot name="toc" />
+											) : (
+												<TOC headings={headings} />
+											)}
+											{showActions && (
+												<div class="border-border mt-8 flex flex-col gap-5 border-t pt-6">
+													<PageActionLinks editUrl={editUrl} />
+												</div>
+											)}
+										</div>
+									</aside>
+								)}
+							</div>
+						</div>
+					</div>
+					<Footer />
+				</div>
+			)
+		}
+	</div>
+
+	{
+		showSidebar && (
+			<dialog
+				data-mobile-sidebar
+				data-state="closed"
+				class="group fixed inset-0 m-0 h-full max-h-full w-full max-w-full border-0 bg-transparent p-0 data-[state=closing]:bg-black/40 data-[state=open]:bg-black/40"
+				aria-label="Site navigation"
+			>
+				<div
+					data-mobile-sidebar-panel
+					class="bg-background h-full w-full -translate-x-full overflow-y-auto shadow-lg transition-transform duration-250 ease-out group-data-[state=open]:translate-x-0 motion-reduce:transition-none"
+				>
+					<div class="border-border sticky top-0 z-[1] flex items-center justify-between border-b bg-inherit px-4 py-3">
+						<a href="/" class="text-foreground text-sm font-semibold no-underline">
+							workers-world Docs
+						</a>
+						<button
+							data-close-sidebar
+							class="text-muted-foreground hover:bg-accent hover:text-foreground flex h-8 w-8 items-center justify-center rounded-md transition-colors"
+							aria-label="Close sidebar"
+						>
+							<Icon name="ph:x" class="h-5 w-5" />
+						</button>
+					</div>
+					<div data-mobile-sidebar-slot />
+				</div>
+			</dialog>
+		)
+	}
+
+	<ScrollToTop />
+</BaseLayout>

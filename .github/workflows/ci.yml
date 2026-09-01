@@ -1,0 +1,88 @@
+name: CI
+
+# docs-site：Nimbus / Astro 文档站 CI（非 Worker Release PR 模板）
+on:
+  push:
+    branches: ["dev_*", "master"]
+  pull_request:
+    branches: ["master"]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: docs-ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  pre-build:
+    name: Pre-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+
+      - name: Check CRLF
+        run: |
+          if git grep -Il $'\r$' -- ':!*.png' ':!*.jpg' ':!*.webp' 2>/dev/null; then
+            echo "::error::CRLF line endings detected"
+            exit 1
+          fi
+          echo "ok: LF only"
+
+      - name: Install (npm ci)
+        run: npm ci
+
+      - name: Format check
+        run: npm run format:check
+        continue-on-error: true
+
+      - name: Astro check
+        run: npm run check
+
+  build:
+    name: Build
+    needs: [pre-build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Upload dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-dist
+          path: dist
+          retention-days: 7
+
+  link-check:
+    name: Link check (lychee)
+    needs: [build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v4
+        with:
+          name: docs-dist
+          path: dist
+      - name: lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
+        with:
+          args: --offline --no-progress './dist/**/*.html'
+          fail: false

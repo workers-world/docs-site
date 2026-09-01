@@ -1,0 +1,71 @@
+---
+title: graft
+description: graft
+---
+
+
+## Graft：子仓安装与扫描
+
+本工作区用 [graft](https://www.npmjs.com/package/@nanonets/graft) 为各 git 子仓建上下文图（wiring graph + per-file cards）。Agent 查代码前应优先 `graft ask` / `graft map`，而不是整仓 grep。
+
+`$0`、无需 API key。`--deep`（概念节点 / 符号摘要）才需要 LLM key，日常扫描不必开。
+
+### 1. 安装全局 CLI
+
+```bash
+npm install -g @nanonets/graft
+graft version   # 确认可用，例如 0.10.x
+```
+
+### 2. 在子仓内 init + build
+
+以 `cloudflare-docs` 为例（其他 Worker 子仓同理，把路径换成目标目录）：
+
+```bash
+# 在 meta 仓根目录 cloudflare_work/ 下执行
+graft init -y 97_cloudflare-docs   # 写入 Cursor/Claude 等 agent 指令 + MCP
+graft build 97_cloudflare-docs     # 扫描源码，生成 97_cloudflare-docs/graft/
+```
+
+`init` 会写入（因仓而异）：
+
+| 产物 | 作用 |
+| --- | --- |
+| `.cursor/rules/graft.mdc`、`.cursor/mcp.json` | Cursor 规则 + MCP |
+| `.claude/skills/graft/`、hooks / statusline | Claude Code 接线 |
+| `AGENTS.md` 中 `<!-- graft:start -->` 段 | 通用 agent 指引 |
+
+`build` 产出 `cloudflare-docs/graft/`（本地缓存，已自动加入 `.gitignore`；队友各自再跑一次 `graft build` 即可）。
+
+### 3. 挂入工作区联邦查询（可选但推荐）
+
+把子仓目录名加入 meta 根 `graft/workspace.json` 的 `children`，之后在根目录 `graft ask` / `graft map` 可跨仓检索，命中带 `[cloudflare-docs/]` 等 scope 标签：
+
+```json
+{
+  "version": 1,
+  "children": [
+    "97_cloudflare-docs",
+    "orchestrator-worker"
+  ]
+}
+```
+
+### 4. 校验
+
+```bash
+graft check 97_cloudflare-docs   # wiring 是否与代码同步
+graft map 97_cloudflare-docs     # 目录集群 / hubs / hotspots 总览
+```
+
+`check` 提示 `deep layer: not built` 属正常（未跑 `--deep`）。只要 `graph check: OK` 即可日常使用。
+
+### 示例结果（cloudflare-docs）
+
+| 项 | 值 |
+| --- | --- |
+| 解析文件 | ~207（TS/TSX/JS/Go/Python 等） |
+| wiring | ~803 nodes / ~1525 edges / ~207 cards |
+| 图目录 | `cloudflare-docs/graft/` |
+
+说明：MDX 文档正文默认不进 wiring 图；索引的是站点源码、脚本与 Worker 入口。大改代码后可再跑 `graft build <dir>`（查询命令也会在用前自动刷新 wiring）。

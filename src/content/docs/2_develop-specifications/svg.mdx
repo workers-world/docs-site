@@ -1,0 +1,88 @@
+---
+title: 文档站 SVG（draw.io）
+description: draw.io 导出的 SVG 在 docs-site 中无法渲染的原因与导出约定。
+---
+
+本站 MDX 里的 `![](./img/xxx.svg)` 会走 Astro `astro:assets`。PNG 一般没问题；**draw.io 默认导出的 SVG 会让图片管线在读元数据时失败**，页面上图不出现。
+
+## 症状
+
+`npm run dev` / `npm run build` 报：
+
+```text
+Could not process image metadata for .../xxx.drawio.svg
+(The stacktrace appears to be already rewritten by something else, but was passed to vite.ssrFixStacktrace. ...)
+```
+
+后面那句 `vite.ssrFixStacktrace` 只是 Vite 二次包装堆栈，**不是根因**。路径写对、文件也在磁盘上，仍然会失败。
+
+## 原因
+
+draw.io / diagrams.net 导出 SVG 时，会在根 `<svg>` 上写一个超长 `content="..."`，里面是整份可再编辑的 mxfile / mxGraphModel（常到几百 KB）。
+
+Astro 用 vendored `image-size` 探测宽高时，**只扫文件前 1000 字节**去匹配完整的 `<svg ...>` 开标签。这 1KB 往往还停在未闭合的 `content="` 里，校验失败 → `NoImageMetadata`。浏览器直接打开这份 SVG 是正常的，坏的是探测窗口太短。
+
+同类问题：[Astro #13006](https://github.com/withastro/astro/issues/13006)、[image-size #410](https://github.com/image-size/image-size/issues/410)。
+
+开标签若长成下面这样，就不能进本站 content 目录给 `![]()` 用：
+
+```xml
+<svg ... width="1122px" height="1192px" viewBox="0 0 1122 1192"
+     content="&lt;mxfile ...mxGraphModel...">
+```
+
+## 约定：导出时不要带图源
+
+**发布用 SVG 不要包含 draw.io 源。** 可再编辑的 `.drawio` 单独存放（例如 meta 仓 `docs/*.drawio`），不要靠 SVG 里的 `content` 做往返编辑。
+
+在 diagrams.net：
+
+1. **File → Export as → SVG**
+2. **关掉 Include a copy of my diagram**（不要把 diagram 副本嵌进 SVG）
+3. 导出文件名用 `xxx.svg`，不要用 `xxx.drawio.svg`（后者通常表示带了源）
+
+已导出、已经带 `content` 的文件：用编辑器删掉根 `<svg>` 上那个超长 `content="..."` 属性，或按上面步骤重新导出覆盖。
+
+### 自检
+
+```bash
+head -c 800 path/to/file.svg
+```
+
+开标签应短、能在几百字节内闭合，且**没有** `content="`。然后 MDX 仍用相对路径：
+
+```md
+![系统架构总览](./img/workers-account-我的-版本发布模板.svg)
+```
+
+`alt` 必须写：空 alt 的图不会进入点击放大（见下节）。
+
+## 图片放大（本地已内置）
+
+不需要再装插件。`docs-site` 在 `BaseLayout.astro` 里加载了 `src/scripts/image-zoom.client.ts`（[medium-zoom](https://github.com/francoischalifour/medium-zoom)），`npm run dev` 打开页面后，**点击正文图片即可放大**，再点空白或关闭按钮还原。
+
+脚本只处理 `article.docs-content img` / `.nb-cl-prose img`，并且会跳过下面三类：
+
+| 条件 | 结果 |
+| --- | --- |
+| `alt=""`（Markdown 写成 `![](...)`） | **不放大** |
+| 图片包在 `<a>` 里 | 不放大（避免和链接抢点击） |
+| `data-nb-no-zoom` | 显式关闭放大 |
+
+所以正文图一律写成带说明的 Markdown：
+
+```md
+![系统架构总览](./img/xxx.svg)
+```
+
+装饰性、不需要放大的图才用空 alt 或 `data-nb-no-zoom`。
+
+## 不推荐的做法
+
+| 做法 | 说明 |
+| --- | --- |
+| 把 SVG 放到 `public/` + `<img src="/...">` | 能绕过 `astro:assets`，但和站内其它 `![](./img/...)` 不一致 |
+| 改导出 PNG | 能渲染，放大后糊 |
+| `postinstall` patch `node_modules` 里的 `1e3` | 升级 Astro 会失效，不要用 |
+
+示例页面：[Worker 总览](/workers/)（`workers/index.mdx`）。

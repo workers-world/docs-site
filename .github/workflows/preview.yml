@@ -1,0 +1,63 @@
+name: Preview deploy
+
+# PR 预览：构建后上传 artifact；实际 wrangler deploy 需 CLOUDFLARE_API_TOKEN，
+# 默认仅构建并评论「需人工 deploy」说明，避免 Agent 自动生产部署。
+# 若 Org 已配置 preview Workers / dispatch namespace，可将 deploy 步打开。
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: docs-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Upload preview dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-preview-${{ github.event.pull_request.number }}
+          path: dist
+          retention-days: 3
+      - name: Comment preview note
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          BODY=$(cat <<EOF
+          <!-- docs-preview -->
+          ## Docs preview build
+
+          静态站点已构建，artifact：\`docs-preview-${PR}\`。
+
+          本地预览：下载 artifact 后 \`npx serve dist\`，或 checkout 本 PR 后 \`npm run preview\`。
+
+          生产部署由维护者执行：\`npm run build && npx wrangler deploy\`（见 README）。
+
+          [本次 run](${RUN_URL})
+          EOF
+          )
+          EXISTING=$(gh api "repos/${{ github.repository }}/issues/${PR}/comments" --paginate \
+            --jq '.[] | select(.body | contains("<!-- docs-preview -->")) | .id' | head -1 || true)
+          if [ -n "$EXISTING" ]; then
+            gh api --method PATCH "repos/${{ github.repository }}/issues/comments/${EXISTING}" -f body="$BODY" >/dev/null
+          else
+            gh pr comment "$PR" --body "$BODY"
+          fi
