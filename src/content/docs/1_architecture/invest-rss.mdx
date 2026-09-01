@@ -340,7 +340,7 @@ erDiagram
 | `0007_event_no.sql`                | `rss_events.event_no`（counter-worker 发号，prefix `INV`）   |
 | `0008_classification_learning.sql` | `classification_signals`、学习调试列                         |
 
-发号对接详见 [counter-worker-integration.md](./counter-worker-integration.md)。
+发号对接详见 `cloudflare_work/docs/counter-worker-integration.md`。
 
 ---
 
@@ -567,8 +567,8 @@ invest-rss-worker/
 
 ## 13. 相关文档
 
-- [invest-rss-worker README](../invest-rss-worker/README.md) — 部署与 API 速查
-- [email-rule-worker README](../email-rule-worker/README.md) — 普通轨规则与 LLM digest
-- [notify-worker README](../notify-worker/README.md) — 通知与 digest 合并
-- [docs/invest.md](./invest.md) — 需求背景与策略决策理念
-- [analysis-engine-architecture.md](./analysis-engine-architecture.md) — 摘要之后的在线世界观（旁路 `Q_ANALYSIS`，不改本仓热路径语义）
+- `cloudflare_work/invest-rss-worker/README.md` — 部署与 API 速查
+- `cloudflare_work/email-rule-worker/README.md` — 普通轨规则与 LLM digest
+- `cloudflare_work/notify-worker/README.md` — 通知与 digest 合并
+- `cloudflare_work/docs/invest.md` — 需求背景与策略决策理念
+- [分析引擎架构](/1_architecture/analysis-engine/) — 摘要之后的在线世界观（旁路 `Q_ANALYSIS`，不改本仓热路径语义）

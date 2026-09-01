@@ -8,7 +8,7 @@ title: 分析引擎架构
 >
 > 跨 Worker 架构权威副本在本文件。实现仓落地后，`analysis-engine-worker/docs/` 只留一行指针回这里。
 >
-> 方案草稿：[`.cursor/plans/有状态分析引擎_481a3f3b.plan.md`](../.cursor/plans/有状态分析引擎_481a3f3b.plan.md)
+> 方案草稿：`cloudflare_work/.cursor/plans/有状态分析引擎_481a3f3b.plan.md`
 
 ## 1. 概述
 
@@ -24,7 +24,7 @@ title: 分析引擎架构
 | 线索 ≠ 判断 ≠ 指令 | advisor 出 `watch/research/risk_note`；本引擎出 thesis；desk 出 `buy/sell/rebalance`                                             |
 | 旧路径零侵入       | 旁路失败吞错，不得拖垮摘要 / 发信 / 顾问                                                                                         |
 | 有变化才打扰       | Phase 1 只落状态；Phase 2 才在 stance / confidence / 矛盾 / thesis 重大改写等实质变化时发信（materialChange 四条件见 §6 步骤 6） |
-| 禁止买卖           | 与 [advisor prompt](../advisor-worker/prompts/advisor.md) 相同：不产出仓位、目标价、买卖                                         |
+| 禁止买卖           | 与 `cloudflare_work/advisor-worker/prompts/advisor.md` 相同：不产出仓位、目标价、买卖                                            |
 
 ---
 
@@ -46,9 +46,9 @@ flowchart LR
 | 摘要   | 分类、`ai_summary`、告警 / digest                             | 无记忆，每条独立                |
 | 顾问   | `market_analysis` + `watch/research/risk_note`；日终 3–5 洞察 | 按条分析，聚类按日重置          |
 | 决策台 | 按 underlying 聚合成买卖草稿                                  | 批处理，为下单服务              |
-| 问答   | [market-qa-agent](../market-qa-agent/src/agent.ts)            | DO 只存最近问答，**不持有判断** |
+| 问答   | `cloudflare_work/market-qa-agent/src/agent.ts`                | DO 只存最近问答，**不持有判断** |
 
-人还在用邮箱和脑子当世界观。顾问聚类（[advice-cluster.ts](../advisor-worker/src/services/advice-cluster.ts)）是「当天压成 3 段」；决策台（[run-draft-batch.ts](../decision-desk-worker/src/services/run-draft-batch.ts)）是「聚完就出买卖」。两者都不是活着的论点。
+人还在用邮箱和脑子当世界观。顾问聚类（`cloudflare_work/advisor-worker/src/services/advice-cluster.ts`）是「当天压成 3 段」；决策台（`cloudflare_work/decision-desk-worker/src/services/run-draft-batch.ts`）是「聚完就出买卖」。两者都不是活着的论点。
 
 ### 2.1 人工仍在做的事
 
@@ -60,7 +60,7 @@ flowchart LR
 
 ### 2.2 为什么不塞进现有三个
 
-- **不要加在 advisor**：[apply-agent.md](./apply-agent.md) 已定顾问是 Executor / 数据 Worker，禁止整体转 DO。
+- **不要加在 advisor**：`cloudflare_work/docs/apply-agent.md` 已定顾问是 Executor / 数据 Worker，禁止整体转 DO。
 - **不要加深 market-qa**：它是拉式问答；每条信号都跑问答会烧配额，且 `AgentState` 只有 `lastQuestion/lastAnswer`。
 - **不要加在 decision-desk**：职责是草稿；分析混进去会污染「线索 ≠ 指令」。
 
@@ -196,14 +196,14 @@ type AnalysisSignal =
 
 ### 5.2 Producer 投递点
 
-fire-and-forget，`try/catch` 吞错，不阻断主路径。仿 [enqueue-desk-signal.ts](../advisor-worker/src/services/enqueue-desk-signal.ts)。
+fire-and-forget，`try/catch` 吞错，不阻断主路径。仿 `cloudflare_work/advisor-worker/src/services/enqueue-desk-signal.ts`。
 
-| 上游       | 时机                                                                                                             | 现有旁路（勿改语义）         | 新增                                    |
-| ---------- | ---------------------------------------------------------------------------------------------------------------- | ---------------------------- | --------------------------------------- |
-| invest-rss | LLM enrich 成功，[applyEnrichmentAndRoute](../invest-rss-worker/src/services/llm-enrich/route-after-llm.ts) 末尾 | `bypassToDecisionDesk`       | `bypassToAnalysisEngine` → `Q_ANALYSIS` |
-| advisor    | [analyzeSummary 与 retryAnalyze 两处](../advisor-worker/src/services/analyze-advice.ts) 成功后                   | `bypassAdviceToDecisionDesk` | 同文件旁路再投 `Q_ANALYSIS`             |
+| 上游       | 时机                                                                                                 | 现有旁路（勿改语义）         | 新增                                    |
+| ---------- | ---------------------------------------------------------------------------------------------------- | ---------------------------- | --------------------------------------- |
+| invest-rss | LLM enrich 成功，`cloudflare_work/invest-rss-worker/src/services/llm-enrich/route-after-llm.ts` 末尾 | `bypassToDecisionDesk`       | `bypassToAnalysisEngine` → `Q_ANALYSIS` |
+| advisor    | `cloudflare_work/advisor-worker/src/services/analyze-advice.ts` 成功后                               | `bypassAdviceToDecisionDesk` | 同文件旁路再投 `Q_ANALYSIS`             |
 
-Queue consumer：校验 envelope → 经 DO binding stub 唤醒 `WorldviewAgent.ingest` → ack。LLM 只在 DO 内调用（且只在 alarm 合并窗口内调用）。**业务队列 `max_retries = 5`**——consumer 本身无 LLM，配额与 Evaluator 拒绝都发生在 DO merge 期，不占队列重试（遵循 [cloudflare-worker-queue-retry](../.cursor/rules/cloudflare-worker-queue-retry.mdc)）。
+Queue consumer：校验 envelope → 经 DO binding stub 唤醒 `WorldviewAgent.ingest` → ack。LLM 只在 DO 内调用（且只在 alarm 合并窗口内调用）。**业务队列 `max_retries = 5`**——consumer 本身无 LLM，配额与 Evaluator 拒绝都发生在 DO merge 期，不占队列重试（遵循 `cloudflare_work/.cursor/rules/cloudflare-worker-queue-retry.mdc`）。
 
 失败契约（DO 返回 → consumer 行为）：
 
@@ -243,13 +243,13 @@ merge 期（alarm 内，ack 之后）的失败处理见 §6 步骤 5：Evaluator
 | theme 数 ≤ 上限                            | 先 compact 再接受                                                         |
 | stance / confidence 类型合法               | 拒绝                                                                      |
 
-软评判（可选 LLM judge）不得覆盖硬规则。范式见 [抽象-spec.md](./抽象-spec.md)。
+软评判（可选 LLM judge）不得覆盖硬规则。范式见 `cloudflare_work/docs/抽象-spec.md`。
 
 ---
 
 ## 7. API（Phase 1）
 
-鉴权：Bearer `ANALYSIS_ADMIN_TOKEN`（Store 可与 `RULES_ADMIN_TOKEN` 同值对照，见 [secrets-inventory.md](./secrets-inventory.md)；新建时按 `[校验方域]_[用途]_TOKEN`）。
+鉴权：Bearer `ANALYSIS_ADMIN_TOKEN`（Store 可与 `RULES_ADMIN_TOKEN` 同值对照，见 `cloudflare_work/docs/secrets-inventory.md`；新建时按 `[校验方域]_[用途]_TOKEN`）。
 
 | 方法 | 路径                       | 说明                                                                                                                          |
 | ---- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -288,23 +288,23 @@ Phase 3 读侧预留：market-qa / desk 经 `SVC_ANALYSIS` binding 访问，toke
 
 ## 10. 实现时关键文件
 
-| 用途             | 路径                                                                                                                                        |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| 顾问旁路模板     | [advisor-worker/src/services/enqueue-desk-signal.ts](../advisor-worker/src/services/enqueue-desk-signal.ts)                                 |
-| 分析信号类型模板 | [framework_sdk_worker/src/desk/desk-signal.ts](../framework_sdk_worker/src/desk/desk-signal.ts)（仿此建 `src/analysis/analysis-signal.ts`） |
-| invest 旁路点    | [invest-rss-worker/src/services/llm-enrich/route-after-llm.ts](../invest-rss-worker/src/services/llm-enrich/route-after-llm.ts)             |
-| Agent / DO 模板  | [market-qa-agent/src/agent.ts](../market-qa-agent/src/agent.ts)（仅参考 DO fetch/SQL 用法；本引擎用纯 DO，且是 push 更新不是 pull 问答）    |
-| 禁止买卖约束     | [advisor-worker/prompts/advisor.md](../advisor-worker/prompts/advisor.md)                                                                   |
-| 顾问不转 DO      | [apply-agent.md](./apply-agent.md)                                                                                                          |
-| 决策台边界       | [decision-desk-architecture.md](./decision-desk-architecture.md)                                                                            |
+| 用途             | 路径                                                                                                                    |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| 顾问旁路模板     | `cloudflare_work/advisor-worker/src/services/enqueue-desk-signal.ts`                                                    |
+| 分析信号类型模板 | `cloudflare_work/framework_sdk_worker/src/desk/desk-signal.ts`（仿此建 `src/analysis/analysis-signal.ts`）              |
+| invest 旁路点    | `cloudflare_work/invest-rss-worker/src/services/llm-enrich/route-after-llm.ts`                                          |
+| Agent / DO 模板  | `cloudflare_work/market-qa-agent/src/agent.ts`（仅参考 DO fetch/SQL 用法；本引擎用纯 DO，且是 push 更新不是 pull 问答） |
+| 禁止买卖约束     | `cloudflare_work/advisor-worker/prompts/advisor.md`                                                                     |
+| 顾问不转 DO      | `cloudflare_work/docs/apply-agent.md`                                                                                   |
+| 决策台边界       | `cloudflare_work/docs/decision-desk-architecture.md`                                                                    |
 
 ---
 
 ## 11. 相关文档
 
-- [invest-rss-architecture.md](./invest-rss-architecture.md) — 摘要层与 LLM enrichment
-- [apply-agent.md](./apply-agent.md) — 顾问聚类 + market-qa；本引擎是第三条路径
-- [decision-desk-architecture.md](./decision-desk-architecture.md) — 买卖草稿
-- [market-qa-agent-integration.md](./market-qa-agent-integration.md) — 拉式问答
-- [抽象-spec.md](./抽象-spec.md) — Hybrid Evaluator
-- [投资顾问Agent模块需求文档.md](./投资顾问Agent模块需求文档.md) — 顾问单条分析（本引擎不替代）
+- [投资 RSS 架构](/1_architecture/invest-rss/) — 摘要层与 LLM enrichment
+- `cloudflare_work/docs/apply-agent.md` — 顾问聚类 + market-qa；本引擎是第三条路径
+- `cloudflare_work/docs/decision-desk-architecture.md` — 买卖草稿
+- `cloudflare_work/docs/market-qa-agent-integration.md` — 拉式问答
+- `cloudflare_work/docs/抽象-spec.md` — Hybrid Evaluator
+- `cloudflare_work/docs/投资顾问Agent模块需求文档.md` — 顾问单条分析（本引擎不替代）

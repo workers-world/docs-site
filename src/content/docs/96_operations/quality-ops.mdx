@@ -6,7 +6,7 @@ title: 质量运维(待整改)
 
 跨 Worker 规范：Hard Evaluator 聚类告警 + **自动日志取证入库** + 诊断 Agent 工单。
 
-需求来源：[requirement/反馈系统.md](requirement/反馈系统.md)
+需求来源：`cloudflare_work/docs/requirement/反馈系统.md`
 
 ## 1. 架构
 
@@ -46,7 +46,7 @@ email-rule 判定不合格 → emitQualityIncident(dedupKey)
 | --------------------- | -------------------------------------------------------------- |
 | 类型与 Hard Evaluator | `framework_sdk_worker/evaluation/quality-incident`             |
 | 平台日志 bundle       | `framework_sdk_worker/observability/platform-log`              |
-| 规则 JSON             | [`rules/quality-ops.json`](../rules/quality-ops.json)          |
+| 规则 JSON             | `cloudflare_work/rules/quality-ops.json`                       |
 | 唯一 ID               | **`dedupKey`**（与 notify、`digest_summaries.dedup_key` 同源） |
 
 ## 3. 绑定
