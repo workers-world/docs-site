@@ -1,5 +1,5 @@
 ---
-import DocsLayout from "../layouts/DocsLayout.astro";
+import DocsLayout from '../layouts/DocsLayout.astro';
 import {
 	getDocsPageProps,
 	getSidebar,
@@ -8,17 +8,17 @@ import {
 	getLastUpdated,
 	getTOC,
 	getBreadcrumbs,
-} from "@cloudflare/nimbus-docs";
-import { config } from "virtual:nimbus/config";
-import { components } from "../mdx-components";
-import { getCollection } from "astro:content";
+} from '@cloudflare/nimbus-docs';
+import { config } from 'virtual:nimbus/config';
+import { components } from '../mdx-components';
+import { getCollection } from 'astro:content';
 
 export const prerender = true;
 
-const docs = await getCollection("docs");
-const home = docs.find((e) => e.id === "index");
+const docs = await getCollection('docs');
+const home = docs.find((e) => e.id === 'index');
 if (!home) {
-	throw new Error("Missing src/content/docs/index.mdx — required for /");
+	throw new Error('Missing src/content/docs/index.mdx — required for /');
 }
 
 const { entry, Content, headings } = await getDocsPageProps({
@@ -26,20 +26,13 @@ const { entry, Content, headings } = await getDocsPageProps({
 	props: { entry: home },
 } as typeof Astro);
 
-const currentSlug = "/";
-const isCustom = entry.data.mode === "custom";
-const sidebarOn =
-	!isCustom &&
-	config.features?.sidebar !== false &&
-	entry.data.sidebar !== false;
+const currentSlug = '/';
+const isCustom = entry.data.mode === 'custom';
+const sidebarOn = !isCustom && config.features?.sidebar !== false && entry.data.sidebar !== false;
 const tocOn =
-	!isCustom &&
-	config.features?.tableOfContents !== false &&
-	entry.data.tableOfContents !== false;
+	!isCustom && config.features?.tableOfContents !== false && entry.data.tableOfContents !== false;
 
-const sidebar = sidebarOn
-	? await getSidebar(currentSlug, { collection: entry.collection })
-	: false;
+const sidebar = sidebarOn ? await getSidebar(currentSlug, { collection: entry.collection }) : false;
 
 const prevNext = await getPrevNext(currentSlug, {
 	sidebarTree: sidebar === false ? [] : sidebar,

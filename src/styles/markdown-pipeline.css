@@ -318,11 +318,11 @@ pre.mermaid[data-processed] svg :not(foreignObject *) {
 }
 
 /* Dark mode adjustments */
-[data-mode="dark"] .mermaid-annotation {
+[data-mode='dark'] .mermaid-annotation {
 	background: rgba(255, 255, 255, 0.03);
 	color: var(--nb-muted-foreground);
 }
 
-[data-mode="dark"] .mermaid-annotation-logo {
+[data-mode='dark'] .mermaid-annotation-logo {
 	opacity: 0.8;
 }

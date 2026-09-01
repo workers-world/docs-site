@@ -3,7 +3,6 @@ title: graft
 description: graft
 ---
 
-
 ## Graft：子仓安装与扫描
 
 本工作区用 [graft](https://www.npmjs.com/package/@nanonets/graft) 为各 git 子仓建上下文图（wiring graph + per-file cards）。Agent 查代码前应优先 `graft ask` / `graft map`，而不是整仓 grep。
@@ -29,11 +28,11 @@ graft build 97_cloudflare-docs     # 扫描源码，生成 97_cloudflare-docs/gr
 
 `init` 会写入（因仓而异）：
 
-| 产物 | 作用 |
-| --- | --- |
+| 产物                                          | 作用              |
+| --------------------------------------------- | ----------------- |
 | `.cursor/rules/graft.mdc`、`.cursor/mcp.json` | Cursor 规则 + MCP |
-| `.claude/skills/graft/`、hooks / statusline | Claude Code 接线 |
-| `AGENTS.md` 中 `<!-- graft:start -->` 段 | 通用 agent 指引 |
+| `.claude/skills/graft/`、hooks / statusline   | Claude Code 接线  |
+| `AGENTS.md` 中 `<!-- graft:start -->` 段      | 通用 agent 指引   |
 
 `build` 产出 `cloudflare-docs/graft/`（本地缓存，已自动加入 `.gitignore`；队友各自再跑一次 `graft build` 即可）。
 
@@ -43,11 +42,8 @@ graft build 97_cloudflare-docs     # 扫描源码，生成 97_cloudflare-docs/gr
 
 ```json
 {
-  "version": 1,
-  "children": [
-    "97_cloudflare-docs",
-    "orchestrator-worker"
-  ]
+	"version": 1,
+	"children": ["97_cloudflare-docs", "orchestrator-worker"]
 }
 ```
 
@@ -62,10 +58,10 @@ graft map 97_cloudflare-docs     # 目录集群 / hubs / hotspots 总览
 
 ### 示例结果（cloudflare-docs）
 
-| 项 | 值 |
-| --- | --- |
-| 解析文件 | ~207（TS/TSX/JS/Go/Python 等） |
-| wiring | ~803 nodes / ~1525 edges / ~207 cards |
-| 图目录 | `cloudflare-docs/graft/` |
+| 项       | 值                                    |
+| -------- | ------------------------------------- |
+| 解析文件 | ~207（TS/TSX/JS/Go/Python 等）        |
+| wiring   | ~803 nodes / ~1525 edges / ~207 cards |
+| 图目录   | `cloudflare-docs/graft/`              |
 
 说明：MDX 文档正文默认不进 wiring 图；索引的是站点源码、脚本与 Worker 入口。大改代码后可再跑 `graft build <dir>`（查询命令也会在用前自动刷新 wiring）。

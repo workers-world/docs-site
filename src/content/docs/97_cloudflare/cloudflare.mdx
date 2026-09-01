@@ -3,18 +3,16 @@ title: 术语
 description: 术语
 ---
 
-
-| 术语 | 解释 |备注 |
-| --- | --- |--- |
-|jsrpc | JavaScript RPC | Cloudflare's built-in mechanism for Worker-to-Worker function|
-|CLI Onboarding | CLI 入门引导（或命令行界面入门） | |
-|durable execution | 持久执行 |在计算机科学（尤其是分布式系统、工作流引擎、事务处理）中，它通常指执行过程的状态被持久化存储，即使发生故障也能恢复并继续完成 |
-|Instrumentation | matrix device, 仪表、仪器 | |
-|local inference | 本地推理 | |
-
-
+| 术语              | 解释                             | 备注                                                                                                                         |
+| ----------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| jsrpc             | JavaScript RPC                   | Cloudflare's built-in mechanism for Worker-to-Worker function                                                                |
+| CLI Onboarding    | CLI 入门引导（或命令行界面入门） |                                                                                                                              |
+| durable execution | 持久执行                         | 在计算机科学（尤其是分布式系统、工作流引擎、事务处理）中，它通常指执行过程的状态被持久化存储，即使发生故障也能恢复并继续完成 |
+| Instrumentation   | matrix device, 仪表、仪器        |                                                                                                                              |
+| local inference   | 本地推理                         |                                                                                                                              |
 
 ### invocation
+
 ![Workers 指标卡片：Invocations 与 Subrequests](./img/img.png)
 
 外部针对worker的请求
@@ -23,21 +21,24 @@ subrequest
 worker内部向外发出的请求
 
 ### request id
+
 ![页面页脚中的 Cloudflare Ray ID](./img/ray_id.png)
 
 这个在日志的链路中就是 request id
 
 ### Gradual deployments
+
 渐进式部署
 
 切流量的那种方式
 https://developers.cloudflare.com/workers/versions-and-deployments/gradual-deployments/
 
-
 ### Flagship
+
 ![旗舰模型与轻量模型对比说明](./img/flagship.png)
 
 ### 兼容日期
+
 ![兼容日期](./img/compatibility_date.png)
 ![兼容日期2](./img/compatibility_date2.png)
 
@@ -49,6 +50,7 @@ https://blog.cloudflare.com/backwards-compatibility-in-cloudflare-workers/
 https://blog.cloudflare.com/workerd-open-source-workers-runtime/
 
 ### workerd
+
 一个始终向后兼容的运行时库
 
 workerd
@@ -58,8 +60,8 @@ worker daemon
 ![workerd2](./img/workerd2.png)
 
 ### tail worker
-![tail](./img/tail_worker.png)
 
+![tail](./img/tail_worker.png)
 
 ### workers ai
 
@@ -69,13 +71,13 @@ worker daemon
 ![workers_ai_binding3](./img/workers_ai_binding3.png)
 
 ### ai search
+
 ![ai_search](./img/ai_search.png)
 ![ai_search2](./img/ai_search2.png)
 
-
 ## 其他新闻
-![quick_sliver](./img/quick_sliver.png)
 
+![quick_sliver](./img/quick_sliver.png)
 
 https://blog.cloudflare.com/ai-code-review/
 

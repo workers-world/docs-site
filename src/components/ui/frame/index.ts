@@ -1,1 +1,1 @@
-export { default as Frame } from "./Frame.astro";
+export { default as Frame } from './Frame.astro';

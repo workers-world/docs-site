@@ -1,1 +1,1 @@
-export { default as CodeGroup } from "./CodeGroup.astro";
+export { default as CodeGroup } from './CodeGroup.astro';

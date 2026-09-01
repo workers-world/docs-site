@@ -22,27 +22,27 @@ node docs/generate-waf-from-routes.mjs
 
 ## URL 约定
 
-| 旧（legacy） | 新（gateway） |
-|--------------|---------------|
-| `https://llm.mailworld.uk/v1/...` | `https://api.mailworld.uk/llm/v1/...` |
-| `https://fund-monitor.mailworld.uk/...` | `https://api.mailworld.uk/fund-monitor/...` |
-| `https://decision-desk-worker.mailworld.uk/...` | `https://api.mailworld.uk/desk/...` |
-| `https://golden.investment.ongoingblog.org/intraday` | `https://api.mailworld.uk/gold/intraday` |
-| `https://price.monitor.ongoingblog.org/...` | `https://api.mailworld.uk/strategy/...` |
+| 旧（legacy）                                         | 新（gateway）                               |
+| ---------------------------------------------------- | ------------------------------------------- |
+| `https://llm.mailworld.uk/v1/...`                    | `https://api.mailworld.uk/llm/v1/...`       |
+| `https://fund-monitor.mailworld.uk/...`              | `https://api.mailworld.uk/fund-monitor/...` |
+| `https://decision-desk-worker.mailworld.uk/...`      | `https://api.mailworld.uk/desk/...`         |
+| `https://golden.investment.ongoingblog.org/intraday` | `https://api.mailworld.uk/gold/intraday`    |
+| `https://price.monitor.ongoingblog.org/...`          | `https://api.mailworld.uk/strategy/...`     |
 
 鉴权仍在后端 Worker（Bearer / Access）。gateway 只剥前缀并透传。
 
 ## `via` / `phase`
 
-| 值 | 含义 |
-|----|------|
-| `via: gateway` | 经 `edge-gateway-worker` 转发 |
-| `via: independent` | 继续独立自定义域名 |
-| `via: internal` | 仅 Service Binding / Cron / Email，无公网 |
-| `phase: migrate` | gateway + 旧 host（Host 分发，客户端可逐步改 URL） |
-| `phase: gateway_ready` | 只挂 gateway，勿新开自定义域名 |
-| `phase: gateway_only` | 已拆旧域名（decommission 后改为此） |
-| `phase: independent` / `internal` | 永不进 gateway |
+| 值                                | 含义                                               |
+| --------------------------------- | -------------------------------------------------- |
+| `via: gateway`                    | 经 `edge-gateway-worker` 转发                      |
+| `via: independent`                | 继续独立自定义域名                                 |
+| `via: internal`                   | 仅 Service Binding / Cron / Email，无公网          |
+| `phase: migrate`                  | gateway + 旧 host（Host 分发，客户端可逐步改 URL） |
+| `phase: gateway_ready`            | 只挂 gateway，勿新开自定义域名                     |
+| `phase: gateway_only`             | 已拆旧域名（decommission 后改为此）                |
+| `phase: independent` / `internal` | 永不进 gateway                                     |
 
 ## 过渡期兼容
 
