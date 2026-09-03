@@ -6,25 +6,25 @@ title: Pipeline 跟踪
 
 跨 Worker 部署状态跟踪的权威说明入口。
 
-| 资源                         | 位置                                                                          |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| Pipeline 注册表（canonical） | `cloudflare_work/docs/pipeline-registry.yaml`                   |
-| JSON Schema                  | `cloudflare_work/docs/pipeline-registry.schema.json`            |
-| Worker 实现与运维            | `cloudflare_work/deploy-tracker-worker/docs/setup.md`           |
+| 资源                         | 位置                                                  |
+| ---------------------------- | ----------------------------------------------------- |
+| Pipeline 注册表（canonical） | `cloudflare_work/docs/pipeline-registry.yaml`         |
+| JSON Schema                  | `cloudflare_work/docs/pipeline-registry.schema.json`  |
+| Worker 实现与运维            | `cloudflare_work/deploy-tracker-worker/docs/setup.md` |
 
 原则：stage 名与步骤数只存在于 YAML；Worker / UI 动态匹配与渲染。
 
 ## 版本状态
 
-| 版本                    | 分支（参考）   | 能力                                                                                                                                    |
-| ----------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| **MVP / v0.1**          | `dev_00_01_00` | Registry + GHA webhook/reconcile + CF Builds + `/dashboard` 关注/归档；CF 成功即归档；合入 master job 回填                              |
-| **v0.2（Phase 3）**     | `dev_00_02_00` | 失败/链断裂 → notify-worker；Overview 源过滤；sparkline 按首个 github stage；失败仓优先对账                                             |
-| **v0.3**                | `dev_00_03_00` | GitHub Actions 失败日志：Queue 拉取 → R2 zip + D1 摘要；Dashboard 展开/下载；告警邮件附摘要                                             |
-| **Release PR registry** | `dev_00_04_00` | 标准轨五段：`ci-check` → `qodana` → `ocr` → `release-merge` → `cf-release`；r2 / lib-newbook / manim 纳入标准轨                         |
-| **需求规划**            | `dev_00_05_00` | 需求 PGREQ → 迭代 PGVER → 跨仓上线计划 → 序列图控制台；R2 附件 + 独立脚本桶                                                             |
-| **Worker Registry**     | `dev_00_06_00` | CF Scripts 元数据快照、env 指纹、对账告警、`/dashboard/registry`；见 `cloudflare_work/docs/requirement/worker-registry.md` |
-| **GHA Stats**           | `dev_00_07_00` | Actions step 级耗时 + 额度预警、`/v1/gha/*`、`/dashboard/gha`；上线计划见 `cloudflare_work/docs/requirement/gha-stats.md` §8     |
+| 版本                    | 分支（参考）   | 能力                                                                                                                         |
+| ----------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| **MVP / v0.1**          | `dev_00_01_00` | Registry + GHA webhook/reconcile + CF Builds + `/dashboard` 关注/归档；CF 成功即归档；合入 master job 回填                   |
+| **v0.2（Phase 3）**     | `dev_00_02_00` | 失败/链断裂 → notify-worker；Overview 源过滤；sparkline 按首个 github stage；失败仓优先对账                                  |
+| **v0.3**                | `dev_00_03_00` | GitHub Actions 失败日志：Queue 拉取 → R2 zip + D1 摘要；Dashboard 展开/下载；告警邮件附摘要                                  |
+| **Release PR registry** | `dev_00_04_00` | 标准轨五段：`ci-check` → `qodana` → `ocr` → `release-merge` → `cf-release`；r2 / lib-newbook / manim 纳入标准轨              |
+| **需求规划**            | `dev_00_05_00` | 需求 PGREQ → 迭代 PGVER → 跨仓上线计划 → 序列图控制台；R2 附件 + 独立脚本桶                                                  |
+| **Worker Registry**     | `dev_00_06_00` | CF Scripts 元数据快照、env 指纹、对账告警、`/dashboard/registry`；见 `cloudflare_work/docs/requirement/worker-registry.md`   |
+| **GHA Stats**           | `dev_00_07_00` | Actions step 级耗时 + 额度预警、`/v1/gha/*`、`/dashboard/gha`；上线计划见 `cloudflare_work/docs/requirement/gha-stats.md` §8 |
 
 改 registry：编辑 YAML → `npm run sync-registry` → push 部署本 Worker（**本版不做** KV/R2 热加载）。
 

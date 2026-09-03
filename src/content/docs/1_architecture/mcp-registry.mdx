@@ -8,9 +8,9 @@ title: MCP Registry 对接
 
 ## 1. 定位与划界
 
-| 组件                                 | 职责                                                                                                      |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| **mcp-registry-worker**              | Agent 可调 API 的 OpenAPI 注册中心：MCP `search` / `execute`                                              |
+| 组件                                 | 职责                                                                                           |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| **mcp-registry-worker**              | Agent 可调 API 的 OpenAPI 注册中心：MCP `search` / `execute`                                   |
 | **deploy-tracker `worker_registry`** | 部署元数据（版本、env 指纹、谁部署）— 见 `cloudflare_work/docs/requirement/worker-registry.md` |
 
 两者 **不合并**。`worker_name` 可交叉引用，表结构与写入路径独立。
@@ -62,15 +62,15 @@ flowchart LR
 
 ### RegistryEntry 字段
 
-| 字段                  | 说明                                                                                                                        |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `worker`              | CF Worker 名                                                                                                                |
-| `svcKey`              | `env` 中 Service Binding 名，如 `SVC_DESK`                                                                                  |
-| `tokenKey`            | `env` 中 token binding 名                                                                                                   |
+| 字段                  | 说明                                                                                                                   |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `worker`              | CF Worker 名                                                                                                           |
+| `svcKey`              | `env` 中 Service Binding 名，如 `SVC_DESK`                                                                             |
+| `tokenKey`            | `env` 中 token binding 名                                                                                              |
 | `baseUrl`             | Service Binding 虚拟 host，如 `https://desk`（与 `cloudflare_work/docs/edge-gateway-routes.json` 的 `fetchHost` 对齐） |
-| `tag` / `description` | OpenAPI 展示，帮助 LLM 选型                                                                                                 |
-| `matchPrefixes`       | execute 路由白名单前缀（靠前优先；勿与既有前缀冲突）                                                                        |
-| `timeoutMs`           | 可选；LLM 类长调用放宽                                                                                                      |
+| `tag` / `description` | OpenAPI 展示，帮助 LLM 选型                                                                                            |
+| `matchPrefixes`       | execute 路由白名单前缀（靠前优先；勿与既有前缀冲突）                                                                   |
+| `timeoutMs`           | 可选；LLM 类长调用放宽                                                                                                 |
 
 ## 5. 命名与 Secrets
 
