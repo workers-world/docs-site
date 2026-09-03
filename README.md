@@ -47,9 +47,9 @@ cnpm exec -- nimbus-docs check
 
 | 字段 | 值 |
 | --- | --- |
-| Build command | `npm run build` |
+| Build command | `npm ci && npm run build`（须产出 `dist/`；`dist` 在 gitignore） |
 | Build output directory | `dist` |
-| Deploy command | `npx wrangler deploy`（Builds）或留空（Pages Git） |
+| Deploy command | `npm run deploy:cf`（**单行**；勿用 `\` 换行）或留空（Pages Git） |
 | Production branch | `master` |
 
 ## 分支

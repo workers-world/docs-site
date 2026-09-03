@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "deploy": "npm run build && npm run deploy:cf",
+    "deploy:cf": "wrangler deploy",
     "preview": "astro preview",
     "check": "astro check",
     "format": "prettier --write \"src/**/*.{md,mdx,ts,tsx,mjs,astro,css,json}\" \"astro.config.mjs\"",
@@ -31,7 +33,7 @@
     "pagefind": "^1.5.2",
     "react": "^19.0.7",
     "react-dom": "^19.0.7",
-    "sharp": "^0.34.0",
+    "sharp": "^0.35.4",
     "tailwind-merge": "^3.6.0",
     "typescript": "^5.8.0"
   },
