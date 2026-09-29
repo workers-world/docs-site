@@ -3,5 +3,8 @@
 name = "docs-site"
 compatibility_date = "2026-08-22"
 
+# Source maps: remap uncaught exception stacks in Workers Logs / Tail (WW-26)
+upload_source_maps = true
+
 [assets]
 directory = "./dist"
