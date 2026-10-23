@@ -1,8 +1,19 @@
 ---
 title: 质量运维(待整改)
+id: operations.quality-ops
+covers:
+  - repo: orchestrator-worker
+    paths: [src/index.ts]
+  - repo: sch1
+    paths: [src/routes/intake.ts]
+claims:
+  - kind: binding
+    value: SVC_SCH1
+  - kind: kind
+    value: ops.error
 ---
 
-> 权威副本：`cloudflare_work/docs/quality-ops.md`
+> 本文为 docs-site 权威正文（`workers-world/docs`）。meta `cloudflare_work/docs/` 已冻结，勿双写。
 
 跨 Worker 规范：Hard Evaluator 聚类告警 + **自动日志取证入库** + 诊断 Agent 工单。
 

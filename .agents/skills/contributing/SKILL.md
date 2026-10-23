@@ -10,7 +10,8 @@ description: Use when writing or editing pages in 95_workers-world/docs (docs-si
 ## Ground rules
 
 - **本站为私有对内文档。** 仍勿写入生产密钥、Token、内网凭据明文。
-- **权威副本在 meta 仓 `cloudflare_work/docs/`。** 大改先在 meta 完成，再同步本站（见 `scripts/migrate-docs.sh`）。
+- **本仓 `src/content/docs/` 是跨 Worker 叙事权威。** meta `cloudflare_work/docs/` 已冻结，勿双写、勿再跑 migrate。
+- 架构/运维精选页须 frontmatter：`id`、`covers`、`claims`（`npm run doc-map`）。
 - **框架是 `@cloudflare/nimbus-docs`（非 Starlight）。** 组件用仓库内 `src/components/ui/*`；完整 registry 可用 `cnpm dlx @cloudflare/nimbus-docs add <slug>`。
 - **不要自动 commit/push**，改完后询问用户。
 

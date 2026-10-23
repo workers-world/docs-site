@@ -1,8 +1,17 @@
 ---
 title: Pipeline 跟踪
+id: architecture.pipeline-tracker
+covers:
+  - repo: deploy-tracker-worker
+    paths: [src/index.ts, wrangler.toml]
+  - repo: cloudflare_work
+    paths: [docs/pipeline-registry.yaml]
+claims:
+  - kind: worker
+    value: deploy-tracker-worker
 ---
 
-> 权威副本：`cloudflare_work/docs/pipeline-tracker.md`
+> 本文为 docs-site 权威正文（`workers-world/docs`）。meta `cloudflare_work/docs/` 已冻结，勿双写。
 
 跨 Worker 部署状态跟踪的权威说明入口。
 

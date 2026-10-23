@@ -1,8 +1,18 @@
 ---
 title: 投资 RSS 架构
+id: architecture.invest-rss
+diagram: mermaid
+covers:
+  - repo: invest-rss-worker
+    paths: [src/index.ts, wrangler.toml]
+claims:
+  - kind: worker
+    value: invest-rss-worker
+  - kind: binding
+    value: SVC_NOTIFY
 ---
 
-> 权威副本：`cloudflare_work/docs/invest-rss-architecture.md`
+> 本文为 docs-site 权威正文（`workers-world/docs`）。meta `cloudflare_work/docs/` 已冻结，勿双写。
 
 > 文档版本：2026-07-06 · 对应 invest-rss-worker `dev_00_05_00`
 

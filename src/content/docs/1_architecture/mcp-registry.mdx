@@ -1,8 +1,18 @@
 ---
 title: MCP Registry 对接
+id: architecture.mcp-registry
+diagram: mermaid
+covers:
+  - repo: mcp-registry-worker
+    paths: [src/index.ts, wrangler.toml]
+claims:
+  - kind: worker
+    value: mcp-registry-worker
+  - kind: path
+    value: /openapi.json
 ---
 
-> 权威副本：`cloudflare_work/docs/mcp-registry-integration.md`
+> 本文为 docs-site 权威正文（`workers-world/docs`）。meta `cloudflare_work/docs/` 已冻结，勿双写。
 
 新建或改造 Worker 时，若提供 **Agent / Code Mode 可调用的 HTTP API**，须按本规范对接 `mcp-registry-worker`（或 PR 写明豁免理由）。
 

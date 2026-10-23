@@ -1,10 +1,21 @@
 ---
 title: Edge Gateway 路由
 description: 公网 API 经 api.mailworld.uk 前缀转发的路由清单与约定。
+id: architecture.edge-gateway
+diagram: mermaid
+covers:
+  - repo: edge-gateway-worker
+    paths: [src/index.ts, wrangler.toml, src/routes.json]
+  - repo: cloudflare_work
+    paths: [docs/edge-gateway-routes.json]
+claims:
+  - kind: host
+    value: api.mailworld.uk
+  - kind: binding
+    value: SVC_
 ---
 
-> 权威副本：meta 仓 `cloudflare_work/docs/edge-gateway-routes.md`  
-> 权威数据：meta 仓 `docs/edge-gateway-routes.json`（本站不托管 JSON）。
+> 本文为 docs-site 权威正文（`workers-world/docs`）。meta `cloudflare_work/docs/` 已冻结，勿双写。
 
 改 JSON 后在 **meta 仓**执行：
 

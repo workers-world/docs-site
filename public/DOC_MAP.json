@@ -1,0 +1,621 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-22T12:55:30.684Z",
+  "chapterCount": 44,
+  "chapters": [
+    {
+      "id": "0_getting-started",
+      "title": "入门",
+      "path": "0_getting-started/index.mdx",
+      "sitePath": "/0_getting-started/",
+      "description": "新人 onboarding",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "1_architecture",
+      "title": "架构",
+      "path": "1_architecture/index.mdx",
+      "sitePath": "/1_architecture/",
+      "description": "Edge Gateway、投资 RSS、分析引擎、MCP Registry、流水线跟踪等架构文档。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "2_develop-specifications",
+      "title": "开发规范",
+      "path": "2_develop-specifications/index.mdx",
+      "sitePath": "/2_develop-specifications/",
+      "description": "开发规范",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "2_develop-specifications.index_dot_ts",
+      "title": "index.ts文件作用",
+      "path": "2_develop-specifications/index_dot_ts.mdx",
+      "sitePath": "/2_develop-specifications/index_dot_ts/",
+      "description": "index.ts文件作用",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "2_develop-specifications.svg",
+      "title": "文档站 SVG（draw.io）",
+      "path": "2_develop-specifications/svg.mdx",
+      "sitePath": "/2_develop-specifications/svg/",
+      "description": "draw.io 导出的 SVG 在 docs-site 中无法渲染的原因与导出约定。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "3_ai",
+      "title": "AI",
+      "path": "3_ai/index.mdx",
+      "sitePath": "/3_ai/",
+      "description": "AI",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "3_ai.cursor",
+      "title": "Cursor",
+      "path": "3_ai/cursor.mdx",
+      "sitePath": "/3_ai/cursor/",
+      "description": "Cursor",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "3_ai.drawio",
+      "title": "Draw.io MCP（Cursor 本地）",
+      "path": "3_ai/drawio.mdx",
+      "sitePath": "/3_ai/drawio/",
+      "description": "在 Cursor 中通过官方 @drawio/mcp 本地 MCP 服务画图，图数据不经过 mcp.draw.io 远程端点。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "3_ai.graft",
+      "title": "graft",
+      "path": "3_ai/graft.mdx",
+      "sitePath": "/3_ai/graft/",
+      "description": "graft",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "3_ai.greptile",
+      "title": "greptile",
+      "path": "3_ai/greptile.mdx",
+      "sitePath": "/3_ai/greptile/",
+      "description": "greptile",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "3_ai.prompt",
+      "title": "提示词",
+      "path": "3_ai/prompt.mdx",
+      "sitePath": "/3_ai/prompt/",
+      "description": "面向 AI 助手的可复用提示词（Observability 慢 span 分析等）",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "3_ai.sandbox",
+      "title": "Sandbox",
+      "path": "3_ai/sandbox.mdx",
+      "sitePath": "/3_ai/sandbox/",
+      "description": "Sandbox",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers",
+      "title": "Worker 总览",
+      "path": "95_workers/index.mdx",
+      "sitePath": "/95_workers/",
+      "description": "各 Worker 摘要页与 GitHub 子仓链接。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.01",
+      "title": "一、公共基础设施",
+      "path": "95_workers/01.mdx",
+      "sitePath": "/95_workers/01/",
+      "description": "公共基础设施",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.02",
+      "title": "二、规则",
+      "path": "95_workers/02.mdx",
+      "sitePath": "/95_workers/02/",
+      "description": "规则",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.03",
+      "title": "三、分析",
+      "path": "95_workers/03.mdx",
+      "sitePath": "/95_workers/03/",
+      "description": "分析",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.04",
+      "title": "四、外部信息",
+      "path": "95_workers/04.mdx",
+      "sitePath": "/95_workers/04/",
+      "description": "外部信息",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.code-spec",
+      "title": "Worker 代码规范",
+      "path": "95_workers/code-spec.mdx",
+      "sitePath": "/95_workers/code-spec/",
+      "description": "目录分层、D1 / DO SQLite 持久层、业务与存储边界、Biome 风格约定。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.deploy-tracker",
+      "title": "deploy-tracker-worker",
+      "path": "95_workers/deploy-tracker.mdx",
+      "sitePath": "/95_workers/deploy-tracker/",
+      "description": "跨仓部署流水线与 Application Spec",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.invest-rss",
+      "title": "invest-rss-worker",
+      "path": "95_workers/invest-rss.mdx",
+      "sitePath": "/95_workers/invest-rss/",
+      "description": "投资 RSS 双轨邮件与事件看板",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.name-spec",
+      "title": "应用名称规范",
+      "path": "95_workers/name-spec.mdx",
+      "sitePath": "/95_workers/name-spec/",
+      "description": "应用名称规范",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.notify-worker",
+      "title": "notify-worker",
+      "path": "95_workers/notify-worker.mdx",
+      "sitePath": "/95_workers/notify-worker/",
+      "description": "notify-worker",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "95_workers.orchestrator",
+      "title": "orchestrator-worker",
+      "path": "95_workers/orchestrator.mdx",
+      "sitePath": "/95_workers/orchestrator/",
+      "description": "Agent 任务编排与 Quality Loop",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "96_operations",
+      "title": "CI/CD 与运维",
+      "path": "96_operations/index.mdx",
+      "sitePath": "/96_operations/",
+      "description": "发布回退、质量运维、Git remote 协议等运维文档。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "96_operations.promote",
+      "title": "Promote new version",
+      "path": "96_operations/promote.mdx",
+      "sitePath": "/96_operations/promote/",
+      "description": "上线发布",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "96_operations.sla",
+      "title": "服务性能",
+      "path": "96_operations/sla.mdx",
+      "sitePath": "/96_operations/sla/",
+      "description": "服务性能",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "97_cloudflare",
+      "title": "Cloudflare",
+      "path": "97_cloudflare/index.mdx",
+      "sitePath": "/97_cloudflare/",
+      "description": "Cloudflare 平台术语与运维技巧笔记。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "97_cloudflare.cloudflare",
+      "title": "术语",
+      "path": "97_cloudflare/cloudflare.mdx",
+      "sitePath": "/97_cloudflare/cloudflare/",
+      "description": "术语",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "97_cloudflare.platform_devops",
+      "title": "平台使用技巧",
+      "path": "97_cloudflare/platform_devops.mdx",
+      "sitePath": "/97_cloudflare/platform_devops/",
+      "description": "平台使用技巧",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "97_cloudflare.search_log",
+      "title": "日志搜索技巧",
+      "path": "97_cloudflare/search_log.mdx",
+      "sitePath": "/97_cloudflare/search_log/",
+      "description": "日志搜索技巧",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "98_references",
+      "title": "参考",
+      "path": "98_references/index.mdx",
+      "sitePath": "/98_references/",
+      "description": "外部的链接参考。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "99_develop-logs",
+      "title": "开发日志",
+      "path": "99_develop-logs/index.mdx",
+      "sitePath": "/99_develop-logs/",
+      "description": "开发日记与阶段性记录。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "99_develop-logs.20260823",
+      "title": "20260823",
+      "path": "99_develop-logs/20260823.mdx",
+      "sitePath": "/99_develop-logs/20260823/",
+      "description": "开发日志",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "992_language",
+      "title": "Language",
+      "path": "992_language/index.mdx",
+      "sitePath": "/992_language/",
+      "description": "TypeScript 与语言相关笔记。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "992_language.ts",
+      "title": "TypeScript",
+      "path": "992_language/ts.mdx",
+      "sitePath": "/992_language/ts/",
+      "description": "typescript语法记录。",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "architecture.analysis-engine",
+      "title": "分析引擎架构",
+      "path": "1_architecture/analysis-engine.mdx",
+      "sitePath": "/1_architecture/analysis-engine/",
+      "diagram": "mermaid",
+      "covers": [
+        {
+          "repo": "analysis-engine-worker",
+          "paths": [
+            "src/index.ts",
+            "wrangler.toml"
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "kind": "worker",
+          "value": "analysis-engine-worker"
+        }
+      ]
+    },
+    {
+      "id": "architecture.edge-gateway",
+      "title": "Edge Gateway 路由",
+      "path": "1_architecture/edge-gateway.mdx",
+      "sitePath": "/1_architecture/edge-gateway/",
+      "description": "公网 API 经 api.mailworld.uk 前缀转发的路由清单与约定。",
+      "diagram": "mermaid",
+      "covers": [
+        {
+          "repo": "edge-gateway-worker",
+          "paths": [
+            "src/index.ts",
+            "wrangler.toml",
+            "src/routes.json"
+          ]
+        },
+        {
+          "repo": "cloudflare_work",
+          "paths": [
+            "docs/edge-gateway-routes.json"
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "kind": "host",
+          "value": "api.mailworld.uk"
+        },
+        {
+          "kind": "binding",
+          "value": "SVC_"
+        }
+      ]
+    },
+    {
+      "id": "architecture.invest-rss",
+      "title": "投资 RSS 架构",
+      "path": "1_architecture/invest-rss.mdx",
+      "sitePath": "/1_architecture/invest-rss/",
+      "diagram": "mermaid",
+      "covers": [
+        {
+          "repo": "invest-rss-worker",
+          "paths": [
+            "src/index.ts",
+            "wrangler.toml"
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "kind": "worker",
+          "value": "invest-rss-worker"
+        },
+        {
+          "kind": "binding",
+          "value": "SVC_NOTIFY"
+        }
+      ]
+    },
+    {
+      "id": "architecture.mcp-registry",
+      "title": "MCP Registry 对接",
+      "path": "1_architecture/mcp-registry.mdx",
+      "sitePath": "/1_architecture/mcp-registry/",
+      "diagram": "mermaid",
+      "covers": [
+        {
+          "repo": "mcp-registry-worker",
+          "paths": [
+            "src/index.ts",
+            "wrangler.toml"
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "kind": "worker",
+          "value": "mcp-registry-worker"
+        },
+        {
+          "kind": "path",
+          "value": "/openapi.json"
+        }
+      ]
+    },
+    {
+      "id": "architecture.pipeline-tracker",
+      "title": "Pipeline 跟踪",
+      "path": "1_architecture/pipeline-tracker.mdx",
+      "sitePath": "/1_architecture/pipeline-tracker/",
+      "covers": [
+        {
+          "repo": "deploy-tracker-worker",
+          "paths": [
+            "src/index.ts",
+            "wrangler.toml"
+          ]
+        },
+        {
+          "repo": "cloudflare_work",
+          "paths": [
+            "docs/pipeline-registry.yaml"
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "kind": "worker",
+          "value": "deploy-tracker-worker"
+        }
+      ]
+    },
+    {
+      "id": "index",
+      "title": "workers-world 文档",
+      "path": "index.mdx",
+      "sitePath": "/index/",
+      "description": "workers-world 组织内部文档站",
+      "covers": [],
+      "claims": []
+    },
+    {
+      "id": "operations.git-remote",
+      "title": "Git Remote 切换",
+      "path": "96_operations/git-remote.mdx",
+      "sitePath": "/96_operations/git-remote/",
+      "covers": [
+        {
+          "repo": "cloudflare_work",
+          "paths": [
+            "git-remote-protocol.sh"
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "kind": "script",
+          "value": "git-remote-protocol.sh"
+        }
+      ]
+    },
+    {
+      "id": "operations.quality-ops",
+      "title": "质量运维(待整改)",
+      "path": "96_operations/quality-ops.mdx",
+      "sitePath": "/96_operations/quality-ops/",
+      "covers": [
+        {
+          "repo": "orchestrator-worker",
+          "paths": [
+            "src/index.ts"
+          ]
+        },
+        {
+          "repo": "sch1",
+          "paths": [
+            "src/routes/intake.ts"
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "kind": "binding",
+          "value": "SVC_SCH1"
+        },
+        {
+          "kind": "kind",
+          "value": "ops.error"
+        }
+      ]
+    },
+    {
+      "id": "operations.release-fallback",
+      "title": "应急发布(待整改)",
+      "path": "96_operations/release-fallback.mdx",
+      "sitePath": "/96_operations/release-fallback/",
+      "description": "应急发布",
+      "covers": [
+        {
+          "repo": "cloudflare_work",
+          "paths": [
+            "docs/release-fallback.md"
+          ]
+        }
+      ],
+      "claims": [
+        {
+          "kind": "command",
+          "value": "wrangler deploy"
+        }
+      ]
+    }
+  ],
+  "index": {
+    "byPath": {
+      "analysis-engine-worker:src/index.ts": [
+        "architecture.analysis-engine"
+      ],
+      "analysis-engine-worker:wrangler.toml": [
+        "architecture.analysis-engine"
+      ],
+      "edge-gateway-worker:src/index.ts": [
+        "architecture.edge-gateway"
+      ],
+      "edge-gateway-worker:wrangler.toml": [
+        "architecture.edge-gateway"
+      ],
+      "edge-gateway-worker:src/routes.json": [
+        "architecture.edge-gateway"
+      ],
+      "cloudflare_work:docs/edge-gateway-routes.json": [
+        "architecture.edge-gateway"
+      ],
+      "invest-rss-worker:src/index.ts": [
+        "architecture.invest-rss"
+      ],
+      "invest-rss-worker:wrangler.toml": [
+        "architecture.invest-rss"
+      ],
+      "mcp-registry-worker:src/index.ts": [
+        "architecture.mcp-registry"
+      ],
+      "mcp-registry-worker:wrangler.toml": [
+        "architecture.mcp-registry"
+      ],
+      "deploy-tracker-worker:src/index.ts": [
+        "architecture.pipeline-tracker"
+      ],
+      "deploy-tracker-worker:wrangler.toml": [
+        "architecture.pipeline-tracker"
+      ],
+      "cloudflare_work:docs/pipeline-registry.yaml": [
+        "architecture.pipeline-tracker"
+      ],
+      "cloudflare_work:git-remote-protocol.sh": [
+        "operations.git-remote"
+      ],
+      "orchestrator-worker:src/index.ts": [
+        "operations.quality-ops"
+      ],
+      "sch1:src/routes/intake.ts": [
+        "operations.quality-ops"
+      ],
+      "cloudflare_work:docs/release-fallback.md": [
+        "operations.release-fallback"
+      ]
+    },
+    "byRepo": {
+      "analysis-engine-worker": [
+        "architecture.analysis-engine"
+      ],
+      "edge-gateway-worker": [
+        "architecture.edge-gateway"
+      ],
+      "cloudflare_work": [
+        "architecture.edge-gateway",
+        "architecture.pipeline-tracker",
+        "operations.git-remote",
+        "operations.release-fallback"
+      ],
+      "invest-rss-worker": [
+        "architecture.invest-rss"
+      ],
+      "mcp-registry-worker": [
+        "architecture.mcp-registry"
+      ],
+      "deploy-tracker-worker": [
+        "architecture.pipeline-tracker"
+      ],
+      "orchestrator-worker": [
+        "operations.quality-ops"
+      ],
+      "sch1": [
+        "operations.quality-ops"
+      ]
+    }
+  }
+}

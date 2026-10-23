@@ -61,12 +61,31 @@ jobs:
       - run: npm ci
       - name: Build
         run: npm run build
+      - name: Upload DOC_MAP
+        uses: actions/upload-artifact@v7
+        with:
+          name: doc-map
+          path: |
+            public/DOC_MAP.json
+            dist/DOC_MAP.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Upload dist
         uses: actions/upload-artifact@v7
         with:
           name: docs-dist
           path: dist
           retention-days: 7
+      - name: Sync R2 corpus (AI Search source)
+        if: github.event_name == 'push' && (startsWith(github.ref, 'refs/heads/dev_') || github.ref == 'refs/heads/master')
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_DOC_CORPUS_BUCKET: ${{ secrets.R2_DOC_CORPUS_BUCKET }}
+          R2_DOC_CORPUS_PREFIX: docs-site/
+        run: npm run sync:corpus
+        continue-on-error: true
 
   link-check:
     name: Link check (lychee)
