@@ -1,0 +1,41 @@
+---
+title: dly9 Artifacts CI
+id: architecture.dly9-ci
+covers:
+  - repo: dly9
+    paths: [src/workflow/ci-pipeline.ts, src/workflow/github-mirror-workflow.ts]
+claims:
+  - kind: app_code
+    value: DLY9
+  - kind: binding
+    value: ARTIFACTS
+---
+
+> docs-site 权威短章。实现细节见 [`dly9/docs/`](https://github.com/workers-world/dly9/tree/dev_00_01_00/docs)（部署后分支以仓内为准）。
+
+## 问题
+
+自托管 GHA runner（Org Variable `WORKERS_WORLD_GHA_RUNNER`）不稳时，TS Worker 的 **check / test / 产物打包** 卡住。生产 `master` 发布已在 Workers Builds；缺口是验证轨。
+
+## 方案
+
+- **源仓**：GitHub（SSOT）
+- **镜像**：Cloudflare Artifacts namespace `workers-world-ci`（单向；私有仓不用官方 public-only `import`）
+- **流水线**：Worker **dly9**（`DLY9`）+ `@cloudflare/ci`（`CIWorkflow` + Sandbox）
+- **不**在本轨 `wrangler deploy` 生产；Preview 仅非 `master`
+
+## 流程
+
+1. GitHub App `push` → `POST /dly9/webhooks/github`（Access Path Bypass）
+2. `GitHubMirrorWorkflow`：Artifacts 为基增量 pack；可选 lock 刷回 GitHub（API，非 `git push`）
+3. `cf.artifacts.repo.pushed` → `CI`：`npm ci` → check ∥ test ∥ build → 可选 Preview
+4. 回写 GitHub Check `dly9 / ci`；pipeline-registry（mok1 pilot）`source: github` match `check_run`
+
+## Pilot
+
+- allowlist 起于 **mok1**；双跑 GHA，确认后再关该仓 GHA verify / `sync_packages_lock`
+- `DLY9_OWN_LOCK_SYNC=false` 时 lock 仍由 GHA 写
+
+## 不迁
+
+Release promote、Qodana、OCR、SDK publish、Container 镜像 CI、dly2 box-test、rev1 审查。
